@@ -1,5 +1,11 @@
 package core;
 
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
+import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -12,9 +18,12 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Window {
     private final long hWindow;
+    private final ImGuiImplGlfw imguiGlfw = new ImGuiImplGlfw();
+    private final ImGuiImplGl3 imguiGl3 = new ImGuiImplGl3();
+    private ImGuiRenderFunction imGuiRenderFunction;
+
     public Window(int width, int height, String title) {
         GLFWErrorCallback.createPrint(System.err).set();
-
         if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
@@ -43,11 +52,28 @@ public class Window {
         } // the stack frame is popped automatically
 
         glfwMakeContextCurrent(hWindow);
+        GL.createCapabilities();
+
         glfwSwapInterval(1);
         glfwShowWindow(hWindow);
 
-        GL.createCapabilities();
+        // init imgui
+        ImGui.createContext();
+
+        ImGuiIO io = ImGui.getIO();
+
+        io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
+        io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+
+        imguiGlfw.init(hWindow, true);
+        String glslVersion = "#version 450";
+        imguiGl3.init(glslVersion);
+
         glClearColor(0.1f, 0.1f,0.1f, 0.1f);
+    }
+
+    public void setGuiRenderFunction(ImGuiRenderFunction func) {
+        this.imGuiRenderFunction = func;
     }
 
     public boolean isLooping() {
@@ -55,11 +81,40 @@ public class Window {
     }
 
     public void swapBuffer() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        imguiGl3.newFrame();
+        imguiGlfw.newFrame();
+        ImGui.newFrame();
+
+        if (imGuiRenderFunction != null) {
+            imGuiRenderFunction.render();
+        }
+
+        ImGui.render();
+        imguiGl3.renderDrawData(ImGui.getDrawData());
+
+        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+            final long backupWindowPtr = glfwGetCurrentContext();
+            ImGui.updatePlatformWindows();
+            ImGui.renderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backupWindowPtr);
+        }
+
         glfwSwapBuffers(hWindow);
     }
 
     public void pollEvents() {
         glfwWaitEvents();
+    }
+
+    public void destroy() {
+        imguiGlfw.shutdown();
+        imguiGl3.shutdown();
+        ImGui.destroyContext();
+
+        Callbacks.glfwFreeCallbacks(hWindow);
+        glfwDestroyWindow(hWindow);
+        glfwTerminate();
     }
 }
