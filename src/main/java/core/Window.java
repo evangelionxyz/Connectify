@@ -8,7 +8,7 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.*;
 
 public class Window {
     private final long hWindow;
@@ -55,6 +55,7 @@ public class Window {
     }
 
     public void swapBuffer() {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glfwSwapBuffers(hWindow);
     }
 
