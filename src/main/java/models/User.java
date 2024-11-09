@@ -6,6 +6,7 @@ public class User {
 
     User(String name) {
         this.name = name;
+        System.out.printf("Test %d\n", 10);
     }
 
 }
