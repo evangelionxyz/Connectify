@@ -7,6 +7,7 @@ public class Application {
     public Application(String title) {
         window = new Window(420, 640, title);
         System.out.println("Application created");
+        System.out.println("hello world");
     }
 
     public void run() {
