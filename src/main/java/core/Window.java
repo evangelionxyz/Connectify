@@ -30,7 +30,7 @@ public class Window {
 
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_RESIZABLE);
 
         hWindow = glfwCreateWindow(width, height, title, 0, 0);
         if (hWindow == 0) {
