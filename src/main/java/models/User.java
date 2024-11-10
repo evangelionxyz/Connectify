@@ -1,12 +1,12 @@
 package models;
 
-public class User {
-    private String id;
+public class User extends ModelBase {
     private String name;
 
     User(String name) {
+        super();
+
         this.name = name;
-        System.out.printf("Test %d\n", 10);
     }
 
 }
