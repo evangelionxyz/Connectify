@@ -8,7 +8,7 @@ public class Community extends ModelBase {
     private List<Mahasiswa> listMahasiswa;
     private List<Quest> listQuest;
 
-    public Community(String name) {
+    public Community(String name, String id) {
         super();
         this.name = name;
         this.listMahasiswa = new ArrayList<>();
@@ -59,5 +59,9 @@ public class Community extends ModelBase {
         System.out.println("Mahasiswa dengan NIM:" + mhs.getId() + "tidak ditemukan");
     }
 
+    public void Printinfo() {
+        System.out.println("Nama Mahasiswa: " + name);
+        System.out.println("Quest yang tersedia: ");
+    }
 
 }
