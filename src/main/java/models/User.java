@@ -1,10 +1,11 @@
 package models;
 
-public class User {
-    private String id;
+public class User extends ModelBase {
     private String name;
 
     User(String name) {
+        super();
+
         this.name = name;
     }
 
