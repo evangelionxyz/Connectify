@@ -1,4 +1,9 @@
 package models;
 
-public class Event {
+public class Event extends ModelBase {
+
+    Event() {
+        super();
+    }
+
 }
