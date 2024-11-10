@@ -1,12 +1,14 @@
 package models;
 
 public class User extends ModelBase {
-    private String name;
+    protected String name;
 
-    User(String name) {
+    public User(String name) {
         super();
-
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
 }

@@ -3,15 +3,19 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Mahasiswa extends User{
-    private List<Quest> questList;
-
+public class Mahasiswa extends User {
+    private final List<Quest> questList;
     private String university;
 
-    Mahasiswa(String name, String university) {
+    public Mahasiswa(String name, String university) {
         super(name);
+
         this.university = university;
         questList = new ArrayList<>();
+    }
+
+    public void participateEvent(Event e) {
+        e.addMahasiswa(this);
     }
 
     public void addQuest(Quest q) {
@@ -22,5 +26,8 @@ public class Mahasiswa extends User{
         return university;
     }
 
-
+    @Override
+    public String toString() {
+        return String.format("Name: %s, ID: %s", name, id);
+    }
 }
