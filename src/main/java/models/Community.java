@@ -42,7 +42,7 @@ public class Community extends ModelBase {
 
     public boolean isMahasiswaExists(String id){
         for (Mahasiswa mhs : listMahasiswa) {
-            if (mhs.getId()==id) {
+            if (mhs.getId() == id) {
                 return true;
             }
         }
