@@ -231,6 +231,10 @@ public class Window {
         ImGui.end();
     }
 
+    public void close() {
+        glfwSetWindowShouldClose(windowHandle, true);
+    }
+
     public void destroy() {
         imguiGlfw.shutdown();
         imguiGl3.shutdown();

@@ -1,7 +1,10 @@
 package models;
 
 public class HRD extends User {
-    HRD(String name) {
-        super(name);
+    private String company;
+
+    public HRD(String name, String username, String company) {
+        super(name, "hrd", username, company);
+        this.company = company;
     }
 }

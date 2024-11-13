@@ -8,12 +8,22 @@ public class Community extends ModelBase {
     private String name;
     private List<Mahasiswa> listMahasiswa;
     private List<Quest> listQuest;
+    private List<Chat> listChat;
 
     public Community(String name) {
         super();
         this.name = name;
         this.listMahasiswa = new ArrayList<>();
         this.listQuest = new ArrayList<>();
+        this.listChat = new ArrayList<>();
+    }
+
+    public Community(String name, String id) {
+        super(id);
+        this.name = name;
+        this.listMahasiswa = new ArrayList<>();
+        this.listQuest = new ArrayList<>();
+        this.listChat = new ArrayList<>();
     }
 
     public String getName() {
@@ -28,14 +38,18 @@ public class Community extends ModelBase {
         return listQuest;
     }
 
-    public void setListQuest(List<Quest> listQuest) {
-        this.listQuest = listQuest;
-    }
-
     public void addMahasiswa(Mahasiswa mhs) {
         if (!listMahasiswa.contains(mhs)) {
             listMahasiswa.add(mhs);
         }
+    }
+
+    public void addChat(Chat chat) {
+        listChat.add(chat);
+    }
+
+    public List<Chat> getChats() {
+        return listChat;
     }
 
     public boolean isMahasiswaExists(String id){
