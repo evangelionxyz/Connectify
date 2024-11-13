@@ -8,7 +8,7 @@ public class Community extends ModelBase {
     private List<Mahasiswa> listMahasiswa;
     private List<Quest> listQuest;
 
-    public Community(String name, String id) {
+    public Community(String name) {
         super();
         this.name = name;
         this.listMahasiswa = new ArrayList<>();
@@ -32,7 +32,7 @@ public class Community extends ModelBase {
     }
 
     public void addMahasiswa(Mahasiswa mhs) {
-        if (listMahasiswa.contains(mhs) == false) {
+        if (!listMahasiswa.contains(mhs)) {
             System.out.println("Berhasil menambahkan Mahasiswa");
             listMahasiswa.add(mhs);
         }else {
@@ -52,11 +52,16 @@ public class Community extends ModelBase {
     public void addQuest(Quest quest) {
         listQuest.add(quest);
     }
+
     public void addQuestToMahasiswa(Mahasiswa mhs, Quest quest) {
         if (isMahasiswaExists(mhs.getId())) {
             mhs.addQuest(quest);
         }
         System.out.println("Mahasiswa dengan NIM:" + mhs.getId() + "tidak ditemukan");
+    }
+
+    public List<Mahasiswa> getMahasiswa() {
+        return listMahasiswa;
     }
 
     public void Printinfo() {

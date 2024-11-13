@@ -9,15 +9,11 @@ import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.system.MemoryStack;
-
-import java.nio.IntBuffer;
-
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Window {
-    private final long hWindow;
+    private final long windowHandle;
     private final ImGuiImplGlfw imguiGlfw = new ImGuiImplGlfw();
     private final ImGuiImplGl3 imguiGl3 = new ImGuiImplGl3();
     private ImGuiRenderFunction imGuiRenderFunction;
@@ -30,38 +26,35 @@ public class Window {
 
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_RESIZABLE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-        hWindow = glfwCreateWindow(width, height, title, 0, 0);
-        if (hWindow == 0) {
+        windowHandle = glfwCreateWindow(width, height, title, 0, 0);
+        if (windowHandle == 0) {
             throw new RuntimeException("Failed to create Window");
         }
 
-        // get the thread stack and push a new frame
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            // int *width, *height;
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
-            glfwGetWindowSize(hWindow, pWidth, pHeight);
-            GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-            if (videoMode != null) {
-                glfwSetWindowPos(hWindow,
-                        (videoMode.width() - pWidth.get(0))/ 2,
-                        (videoMode.height() - pHeight.get(0))/2);
-            }
-        } // the stack frame is popped automatically
+        int[] pWidth = new int[1];
+        int[] pHeight = new int[1];
 
-        glfwMakeContextCurrent(hWindow);
+        glfwGetWindowSize(windowHandle, pWidth, pHeight);
+        GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        if (videoMode != null) {
+            glfwSetWindowPos(windowHandle,
+                    (videoMode.width() - pWidth[0])/ 2,
+                    (videoMode.height() - pHeight[0])/2);
+        }
+
+        glfwMakeContextCurrent(windowHandle);
         GL.createCapabilities();
 
         glfwSwapInterval(1);
-        glfwShowWindow(hWindow);
+        glfwShowWindow(windowHandle);
 
         // init imgui
         ImGui.createContext();
         applyTheme();
 
-        imguiGlfw.init(hWindow, true);
+        imguiGlfw.init(windowHandle, true);
         String glslVersion = "#version 450";
         imguiGl3.init(glslVersion);
 
@@ -73,7 +66,7 @@ public class Window {
     }
 
     public boolean isLooping() {
-        return !glfwWindowShouldClose(hWindow);
+        return !glfwWindowShouldClose(windowHandle);
     }
 
     public void swapBuffer() {
@@ -102,7 +95,7 @@ public class Window {
             glfwMakeContextCurrent(backupWindowPtr);
         }
 
-        glfwSwapBuffers(hWindow);
+        glfwSwapBuffers(windowHandle);
     }
 
     public void pollEvents() {
@@ -114,10 +107,12 @@ public class Window {
 
         ImGuiIO io = ImGui.getIO();
         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
-        io.getConfigViewportsNoDecoration();
+        io.setConfigViewportsNoDecoration(true);
 
         float fontSize = 16.0f;
         io.setFontDefault(io.getFonts().addFontFromFileTTF("resources/fonts/inter-regular.ttf", fontSize));
+
+        //style.setWindowPadding(new ImVec2(12.0f, 8.0f));
 
         style.setColor(ImGuiCol.Text, 1.00f, 1.0f, 1.00f, 1.00f);
         style.setColor(ImGuiCol.TextDisabled, 0.60f, 0.60f, 0.60f, 1.00f);
@@ -152,13 +147,11 @@ public class Window {
         style.setColor(ImGuiCol.ResizeGrip, 0.40f, 0.40f, 0.40f, 1.00f);
         style.setColor(ImGuiCol.ResizeGripHovered, 0.56f, 0.56f, 0.56f, 1.00f);
         style.setColor(ImGuiCol.ResizeGripActive, 0.80f, 0.80f, 0.80f, 1.00f);
-
         style.setColor(ImGuiCol.TabUnfocusedActive, 0.15f, 0.15f, 0.15f, 1.00f);
         style.setColor(ImGuiCol.Tab, 0.23f, 0.23f, 0.23f, 1.00f);
         style.setColor(ImGuiCol.TabHovered, 0.29f, 0.29f, 0.29f, 1.00f);
-        style.setColor(ImGuiCol.TabActive, 0.48f, 0.48f, 0.48f, 1.00f);
+        style.setColor(ImGuiCol.TabActive, 0.10f, 0.15f, 0.33f, 1.00f);
         style.setColor(ImGuiCol.TabUnfocused, 0.23f, 0.23f, 0.23f, 1.00f);
-
         style.setColor(ImGuiCol.DockingPreview, 0.15f, 0.15f, 0.15f, 1.00f);
         style.setColor(ImGuiCol.DockingEmptyBg, 0.15f, 0.15f, 0.15f, 1.00f);
         style.setColor(ImGuiCol.PlotLines, 0.78f, 0.52f, 0.00f, 1.00f);
@@ -216,13 +209,15 @@ public class Window {
         ImGui.setNextWindowViewport(mainViewport.getID());
 
         int dockNodeFlags = ImGuiDockNodeFlags.None;
-        int windowFlags = ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar
-                | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
+        int windowFlags = ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse
+                | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus
+                | ImGuiWindowFlags.NoNavFocus;
 
         ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, new ImVec2(1.0f, 2.0f));
         ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
 
-        ImGui.begin("DockSpace", windowFlags);
+        ImGui.begin("Connectify", windowFlags);
+        ImGui.popStyleVar(2);
 
         ImGuiStyle style = ImGui.getStyle();
         final float minWindowSizeX = 220.0f;
@@ -234,7 +229,6 @@ public class Window {
 
     private void endDockSpace() {
         ImGui.end();
-        ImGui.popStyleVar(2);
     }
 
     public void destroy() {
@@ -242,8 +236,8 @@ public class Window {
         imguiGl3.shutdown();
         ImGui.destroyContext();
 
-        Callbacks.glfwFreeCallbacks(hWindow);
-        glfwDestroyWindow(hWindow);
+        Callbacks.glfwFreeCallbacks(windowHandle);
+        glfwDestroyWindow(windowHandle);
         glfwTerminate();
     }
 }
