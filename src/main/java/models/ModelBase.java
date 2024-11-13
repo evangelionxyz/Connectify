@@ -3,7 +3,7 @@ package models;
 public class ModelBase {
     protected String id;
 
-    ModelBase() {
+    protected ModelBase() {
         this.id = Utils.generateUUID();
     }
 
@@ -12,6 +12,7 @@ public class ModelBase {
     }
 
     public String getId() {
+
         return id;
     }
 }
