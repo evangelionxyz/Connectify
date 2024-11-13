@@ -2,6 +2,7 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Community extends ModelBase {
     private String name;
@@ -33,16 +34,13 @@ public class Community extends ModelBase {
 
     public void addMahasiswa(Mahasiswa mhs) {
         if (!listMahasiswa.contains(mhs)) {
-            System.out.println("Berhasil menambahkan Mahasiswa");
             listMahasiswa.add(mhs);
-        }else {
-            System.out.println("Gagal menabahkan Mahasiswa");
         }
     }
 
     public boolean isMahasiswaExists(String id){
         for (Mahasiswa mhs : listMahasiswa) {
-            if (mhs.getId() == id) {
+            if (Objects.equals(mhs.getId(), id)) {
                 return true;
             }
         }

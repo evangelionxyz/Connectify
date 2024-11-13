@@ -1,5 +1,12 @@
 package core;
 
+import com.google.api.core.ApiFuture;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.*;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.cloud.FirestoreClient;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -8,16 +15,19 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiTreeNodeFlags;
-import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import models.Community;
 import models.Event;
 import models.Mahasiswa;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.*;
 
 public class Application {
+
+    public static FirebaseApp firebaseApp;
+    public static Firestore firestore;
+
     private final Window window;
 
     private List<Mahasiswa> mhsList;
@@ -26,6 +36,7 @@ public class Application {
     private Community selectedCommunity = new Community("Community");
 
     public Application(String title) {
+
         window = new Window(1080, 720, title);
         System.out.println("Application created");
 
@@ -63,10 +74,74 @@ public class Application {
         communityList.add(teluCommunity);
     }
 
+    public static void initializeFirebase() throws IOException {
+        // "D:/Dev/connectify-telu-firebase-adminsdk.json"
+
+        System.out.println("[INFO] Initializing Firebase");
+        FileInputStream serviceAccount = new FileInputStream("D:/Dev/connectify-telu-firebase-adminsdk.json");
+        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
+
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredentials(credentials).build();
+
+        firebaseApp = FirebaseApp.initializeApp(options);
+        firestore = FirestoreClient.getFirestore(firebaseApp);
+
+        System.out.printf("[INFO] Firebase Name: %s\n", firebaseApp.getName());
+        System.out.println("[INFO] Firebase initialized");
+        System.out.println("[INFO] Firestore initialized");
+    }
+
     private void userInfo() {
         ImGui.begin("##user_info");
         ImGui.text("Evangelion");
         ImGui.end();
+    }
+
+    public static void sendMessageToFirestore(String message) {
+        try {
+            Map<String, Object> messageData = new HashMap<>();
+            messageData.put("content", message);
+            messageData.put("timestamp", FieldValue.serverTimestamp());
+            messageData.put("sender", "TestUser");
+
+            firestore.collection("messages").document()
+                    .set(messageData)
+                    .get();
+
+            System.out.printf("[INFO] Message sent: %s\n", message);
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to send message: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static void readMessageFromFirestore() {
+        try {
+            ApiFuture<QuerySnapshot> future = firestore.collection("messages")
+                    .orderBy("timestamp", Query.Direction.DESCENDING)
+                    .limit(10)
+                    .get();
+
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            System.out.printf("[INFO] Last %d messages\n", documents.size());
+
+            for (QueryDocumentSnapshot document : documents) {
+                String content = document.getString("content");
+                Timestamp timestamp = document.getTimestamp("timestamp");
+                String sender = document.getString("sender");
+
+                System.out.printf("[INFO] Message from %s at %s: %s\n",
+                        sender,
+                        timestamp != null ? timestamp.toDate() : "pending",
+                        content);
+            }
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to read messages: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void communityPage() {
@@ -125,16 +200,22 @@ public class Application {
         {
             ImGui.beginChild("##community_send_message", new ImVec2(0.0f, sendChatHeight), true);
             ImString imString = new ImString();
-            imString.set("Hello World");
+
+            Runnable sendMessage = () -> {
+              if (imString.get() != null && !imString.get().trim().isEmpty()) {
+                  sendMessageToFirestore(imString.get());
+                  imString.clear();
+              }
+            };
 
             if (ImGui.inputText("##chat",  imString, ImGuiInputTextFlags.EnterReturnsTrue)) {
-                // TODO: Send message
+                sendMessage.run();
             }
 
             ImGui.sameLine();
 
             if (ImGui.button("Send", new ImVec2(200.0f, ImGui.getContentRegionAvail().y))) {
-                // TODO: Send message
+                sendMessage.run();
             }
 
             ImGui.endChild();

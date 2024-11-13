@@ -1,7 +1,10 @@
 package models;
 
+import com.google.cloud.Timestamp;
+
 public class Chat {
     private String message;
+    private Timestamp timestamp;
 
     public Chat() {
     }
