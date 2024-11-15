@@ -79,9 +79,11 @@ public class LoginWindow extends WindowBase {
                     }
 
                     if (AppManager.currentUser != null) {
+                        nameInput.clear();
                         passwordInput.clear();
                         companyInput.clear();
                         usernameInput.clear();
+                        
                         this.close();
                     }
                 };
@@ -104,6 +106,7 @@ public class LoginWindow extends WindowBase {
                     }
 
                     if (AppManager.currentUser != null) {
+                        nameInput.clear();
                         passwordInput.clear();
                         companyInput.clear();
                         usernameInput.clear();
