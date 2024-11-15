@@ -80,7 +80,7 @@ public class Community extends ModelBase {
         System.out.println("Nama Mahasiswa: " + name);
         System.out.println("Quest yang tersedia: ");
 
-//        ini yang gw ubah dikit
+//        ini yang gw ubah dikit yak
     }
 
 }
