@@ -8,8 +8,11 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import core.EncryptionUtils;
 import models.HRD;
 import models.Mahasiswa;
+
+import javax.crypto.SecretKey;
 
 public class LoginWindow extends WindowBase {
 
@@ -104,7 +107,6 @@ public class LoginWindow extends WindowBase {
                         passwordInput.clear();
                         companyInput.clear();
                         usernameInput.clear();
-
                         if (AppManager.registerUser(AppManager.currentUser)) {
                             this.close();
                         }

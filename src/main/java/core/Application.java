@@ -28,7 +28,7 @@ public class Application {
     private final LoginWindow loginWindow = new LoginWindow();
 
     public Application(String title) {
-
+        System.out.println("Hello");
         window = new Window(1080, 720, title);
         System.out.println("Application created");
         communityList = new ArrayList<>();
