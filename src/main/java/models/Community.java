@@ -79,6 +79,8 @@ public class Community extends ModelBase {
     public void Printinfo() {
         System.out.println("Nama Mahasiswa: " + name);
         System.out.println("Quest yang tersedia: ");
+
+//        ini yang gw ubah dikit
     }
 
 }
