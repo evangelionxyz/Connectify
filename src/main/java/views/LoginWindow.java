@@ -107,14 +107,8 @@ public class LoginWindow extends WindowBase {
                         passwordInput.clear();
                         companyInput.clear();
                         usernameInput.clear();
-
-                        try {
-                            SecretKey key = EncryptionUtils.generateSecretKey();
-                            if (AppManager.registerUser(AppManager.currentUser, key)) {
-                                this.close();
-                            }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
+                        if (AppManager.registerUser(AppManager.currentUser)) {
+                            this.close();
                         }
                     }
                 };

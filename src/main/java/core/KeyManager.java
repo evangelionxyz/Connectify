@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Base64;
 
 public class KeyManager {
-    private static final String GEN_FILE_PATH = "D:/connectity_telu_aes_key.txt";
+    private static final String GEN_FILE_PATH = "D:/connectify_telu_aes_key.txt";
 
     public static void main(String[] args) {
         try {
@@ -19,7 +19,7 @@ public class KeyManager {
 
             String base64Key = Base64.getEncoder().encodeToString(secretKey.getEncoded());
 
-            saveKeyToFile(base64Key, GEN_FILE_PATH);
+            saveKeyToFile(base64Key);
             System.out.println("Key successfully saved to "+ GEN_FILE_PATH);
 
         } catch (Exception e) {
@@ -28,8 +28,8 @@ public class KeyManager {
         }
     }
 
-    private static void saveKeyToFile(String base64Key, String filepath) throws IOException {
-        File file = new File(filepath);
+    private static void saveKeyToFile(String base64Key) throws IOException {
+        File file = new File(KeyManager.GEN_FILE_PATH);
         try (FileWriter writer = new FileWriter(file)){
             writer.write(base64Key);
         }

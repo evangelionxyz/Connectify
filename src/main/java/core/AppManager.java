@@ -48,7 +48,7 @@ public class AppManager {
         }
     }
 
-    public static boolean registerUser(User user, SecretKey key) {
+    public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = new HashMap<>();
             userData.put("username", user.getUsername());
@@ -57,13 +57,12 @@ public class AppManager {
             userData.put("company", user.getCompany());
 
             // encrypt the password before storing
-            String encryptedPassword = EncryptionUtils.encrypt(user.getPassword(), key);
+            String encryptedPassword = EncryptionUtils.encrypt(user.getPassword(), EncryptionUtils.getGlobalSecretKey());
             userData.put("password", encryptedPassword);
             userData.put("id", user.getId());
 
             // user -> document
-            DocumentReference docRef = firestore.collection("users")
-                    .document(user.getId());
+            DocumentReference docRef = firestore.collection("users").document(user.getId());
 
             ApiFuture<WriteResult> result = docRef.set(userData);
 
@@ -79,32 +78,36 @@ public class AppManager {
 
     public static User loginUser(String username, String password) {
         try {
-            Query query = firestore.collection("users")
+            ApiFuture<QuerySnapshot> query = firestore.collection("users")
                     .whereEqualTo("username", username)
-                    .limit(1);
+                    .get();
 
-            ApiFuture<QuerySnapshot> querySnapshot = query.get();
-            QuerySnapshot snapshot = querySnapshot.get();
+            QuerySnapshot querySnapshot = query.get();
 
-            if (snapshot.isEmpty()) {
-                System.err.println("[Error] No user found with username: "+username);
-                return null;
+            // loop through each document that matches the username
+            for (QueryDocumentSnapshot doc : querySnapshot.getDocuments()) {
+
+                // retrieve encrypted password from Firestore
+                String encryptedPasswordStored = doc.getString("password");
+
+                // encrypt the input password for comparison
+                String encryptedPasswordInput = EncryptionUtils.encrypt(password, EncryptionUtils.getGlobalSecretKey());
+
+                // compare
+                assert encryptedPasswordStored != null;
+                if (encryptedPasswordStored.equals(encryptedPasswordInput)) {
+                    String id = doc.getString("id");
+                    String displayName = doc.getString("displayname");
+                    String type = doc.getString("type");
+                    String company = doc.getString("company");
+
+                    User loggedInUser = new User(displayName, username, type, company, password);
+                    loggedInUser.setId(id);
+
+                    return loggedInUser;
+                }
             }
-
-            QueryDocumentSnapshot userDoc = snapshot.getDocuments().get(0);
-
-            String storedHash = userDoc.getString("password");
-
-            for (QueryDocumentSnapshot doc : querySnapshot.get().getDocuments()) {
-                String name = doc.getString("displayname");
-                String type = doc.getString("type");
-                String company = doc.getString("company");
-                String id = doc.getString("id");
-                User newUser = new User(name, username, type, company, password);
-                newUser.setId(id);
-                return newUser;
-            }
-
+            System.err.println("[ERROR] No matching user found or incorect password.");
             return null;
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to login user from firestore: "+e.getMessage());
