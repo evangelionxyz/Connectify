@@ -8,11 +8,8 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import core.EncryptionUtils;
 import models.HRD;
 import models.Mahasiswa;
-
-import javax.crypto.SecretKey;
 
 public class LoginWindow extends WindowBase {
 
@@ -20,10 +17,10 @@ public class LoginWindow extends WindowBase {
     private String[] loginTypes;
     private String currentLoginType;
 
-    private ImString nameInput = new ImString(256);
-    private ImString usernameInput = new ImString(256);
-    private ImString passwordInput = new ImString(256);
-    private ImString companyInput = new ImString(256);
+    private final ImString nameInput = new ImString(256);
+    private final ImString usernameInput = new ImString(256);
+    private final ImString passwordInput = new ImString(256);
+    private final ImString companyInput = new ImString(256);
 
     private ImInt imIntIndex;
 
@@ -83,7 +80,7 @@ public class LoginWindow extends WindowBase {
                         passwordInput.clear();
                         companyInput.clear();
                         usernameInput.clear();
-                        
+
                         this.close();
                     }
                 };

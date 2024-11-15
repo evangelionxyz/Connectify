@@ -29,6 +29,10 @@ public class Community extends ModelBase {
         this.owner = owner;
     }
 
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
     public User getOwner() {
         return owner;
     }
@@ -39,6 +43,18 @@ public class Community extends ModelBase {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setMahasiswa(ArrayList<Mahasiswa> mhs) {
+        this.listMahasiswa = mhs;
+    }
+
+    public void setChats(ArrayList<Chat> chats) {
+        this.listChat = chats;
+    }
+
+    public void setQuests(ArrayList<Quest> quests) {
+        this.listQuest = quests;
     }
 
     public void addMahasiswa(Mahasiswa mhs) {

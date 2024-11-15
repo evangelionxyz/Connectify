@@ -175,7 +175,80 @@ public class AppManager {
         firestore = FirestoreClient.getFirestore(firebaseApp);
 
         // initialize communities
+        startListeningToCommunities();
         loadCommunities();
+    }
+
+    private static void startListeningToCommunities() {
+        firestore.collection("communities").addSnapshotListener((snapshot, error) -> {
+           if (error != null) {
+               System.err.println("[ERROR]  Listening failed: "+error);
+               return;
+           }
+
+           if (snapshot != null) {
+               for (DocumentChange change : snapshot.getDocumentChanges()) {
+                   String docId = change.getDocument().getId();
+                   // find if the document ID matches a local community
+                   Community localCommunity = communities.stream()
+                           .filter(c -> c.getId().equals(docId))
+                           .findFirst()
+                           .orElse(null);
+                   // handle based on the type of change
+                   switch (change.getType()) {
+                       case ADDED -> {
+                           if (localCommunity != null) {
+                               Community newCommunity = createCommunityFromDocument(change.getDocument());
+                               communities.add(newCommunity);
+                           }
+                           break;
+                       }
+                       case MODIFIED -> {
+                           if (localCommunity != null) {
+                               updateLocalCommunity(localCommunity, change.getDocument());
+                           }
+                           break;
+                       }
+                       case REMOVED -> {
+                           if (localCommunity != null) {
+                               communities.remove(localCommunity);
+                           }
+                           break;
+                       }
+                   }
+               }
+           }
+        });
+    }
+
+    private static Community createCommunityFromDocument(DocumentSnapshot doc) {
+        String name = doc.getString("name");
+        String ownerId = doc.getString("ownerID");
+        User owner = getUserById(ownerId);
+        Community com = new Community(name, owner);
+        com.setId(doc.getId());
+        return com;
+    }
+
+    private static void updateLocalCommunity(Community community, DocumentSnapshot doc) {
+        String name = doc.getString("name");
+        String id = doc.getString("id");
+
+        // load chats
+        ArrayList<String> chatIDs = (ArrayList<String>)doc.get("chatIDs");
+        ArrayList<Chat> chats = new ArrayList<>();
+
+        assert chatIDs != null;
+        chatIDs.forEach(x -> {
+            Chat c = getChatById(x);
+            if (c != null) {
+                chats.add(c);
+            }
+        });
+
+        community.setChats(chats);
+        community.setName(name);
+        community.setId(id);
     }
 
     private static void loadCommunities() {
@@ -200,7 +273,6 @@ public class AppManager {
                         com.addChat(c);
                     }
                 });
-
                 com.setId(id);
 
                 communities.add(com);
