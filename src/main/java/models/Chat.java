@@ -8,7 +8,6 @@ public class Chat {
     private User sender;
     private String imageId;
 
-
     public Chat() {
     }
 
@@ -25,15 +24,15 @@ public class Chat {
         this.timestamp = timestamp;
     }
 
-    public String getMessage() {
+    public final String getMessage() {
         return message;
     }
 
-    public Timestamp getTimestamp() {
+    public final Timestamp getTimestamp() {
         return timestamp;
     }
 
-    public User getSender() {
+    public final User getSender() {
         return sender;
     }
 }

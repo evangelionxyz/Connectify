@@ -10,7 +10,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.*;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.hash.Bcrypt;
 import com.google.firebase.cloud.FirestoreClient;
 import models.Chat;
 import models.Community;
@@ -111,7 +110,7 @@ public class AppManager {
         }
     }
 
-    public static User getUser(String userId) {
+    public static User getUserById(String userId) {
         return null;
     }
 
