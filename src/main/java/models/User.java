@@ -8,7 +8,6 @@ public class User extends ModelBase {
     protected String company;
 
     public User() {
-
     }
 
     public User(String name, String username, String type, String company) {

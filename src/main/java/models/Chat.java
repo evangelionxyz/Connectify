@@ -5,14 +5,16 @@ import com.google.cloud.Timestamp;
 public class Chat {
     private String message;
     private Timestamp timestamp;
-    private String senderId;
+    private User sender;
+    private String imageId;
+
 
     public Chat() {
     }
 
-    public Chat(String message, String senderId) {
+    public Chat(String message, User sender) {
         this.message = message;
-        this.senderId = senderId;
+        this.sender = sender;
     }
 
     public void setMessage(String message) {
@@ -31,7 +33,7 @@ public class Chat {
         return timestamp;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public User getSender() {
+        return sender;
     }
 }

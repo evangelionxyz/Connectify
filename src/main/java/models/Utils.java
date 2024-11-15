@@ -6,6 +6,4 @@ public class Utils {
     static String generateUUID() {
         return UUID.randomUUID().toString();
     }
-
-
 }

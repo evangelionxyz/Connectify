@@ -151,7 +151,7 @@ public class Application {
 
             Runnable sendMessage = () -> {
               if (imString.get() != null && !imString.get().trim().isEmpty()) {
-                  Chat newChat = new Chat(imString.get(), AppManager.currentUser.getId());
+                  Chat newChat = new Chat(imString.get(), AppManager.currentUser);
                   AppManager.sendMessageToDb(selectedCommunity, newChat);
                   imString.clear();
               }
