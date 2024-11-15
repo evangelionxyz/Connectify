@@ -11,9 +11,9 @@ import com.google.cloud.firestore.*;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
-import models.Chat;
-import models.Community;
-import models.User;
+import models.*;
+
+import javax.crypto.SecretKey;
 
 public class AppManager {
     public static FirebaseApp firebaseApp;
@@ -48,14 +48,17 @@ public class AppManager {
         }
     }
 
-    public static boolean registerUser(User user) {
+    public static boolean registerUser(User user, SecretKey key) {
         try {
             Map<String, Object> userData = new HashMap<>();
             userData.put("username", user.getUsername());
             userData.put("displayname", user.getName());
             userData.put("type", user.getType());
             userData.put("company", user.getCompany());
-            userData.put("password", user.getPassword());
+
+            // encrypt the password before storing
+            String encryptedPassword = EncryptionUtils.encrypt(user.getPassword(), key);
+            userData.put("password", encryptedPassword);
             userData.put("id", user.getId());
 
             // user -> document
@@ -92,7 +95,6 @@ public class AppManager {
 
             String storedHash = userDoc.getString("password");
 
-
             for (QueryDocumentSnapshot doc : querySnapshot.get().getDocuments()) {
                 String name = doc.getString("displayname");
                 String type = doc.getString("type");
@@ -106,6 +108,15 @@ public class AppManager {
             return null;
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to login user from firestore: "+e.getMessage());
+            return null;
+        }
+    }
+
+    private static String getDecryptedPassword(String encryptedPassword, SecretKey key) {
+        try {
+            return EncryptionUtils.decrypt(encryptedPassword, key);
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to decrypt password: "+e.getMessage());
             return null;
         }
     }
@@ -124,10 +135,8 @@ public class AppManager {
     }
 
     public static void initializeFirebase() throws IOException {
-        // "D:/Dev/connectify-telu-firebase-adminsdk.json"
-        FileInputStream serviceAccount = new FileInputStream("D:/Dev/connectify-telu-firebase-adminsdk.json");
+        FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");
         GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(credentials).build();
         firebaseApp = FirebaseApp.initializeApp(options);
