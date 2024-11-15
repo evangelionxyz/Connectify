@@ -17,6 +17,7 @@ public class Quest extends ModelBase {
             System.out.println("Quest Telah Dikerjakan");
         } else {
             isCompleted = true;
+
             System.out.println("Quest Telah Selesai");
         }
     }

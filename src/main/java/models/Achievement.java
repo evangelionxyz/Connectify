@@ -25,10 +25,6 @@ public class Achievement extends ModelBase {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
     public boolean isExists(String tag) {
        for (String name : tags) {
            if (name.equals(tag)) {

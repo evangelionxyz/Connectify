@@ -1,10 +1,12 @@
 package models;
 
+import core.StringUtils;
+
 public class ModelBase {
     protected String id;
 
     protected ModelBase() {
-        this.id = Utils.generateUUID();
+        this.id = StringUtils.generateUUID();
     }
 
     protected ModelBase(String id) {
@@ -16,7 +18,6 @@ public class ModelBase {
     }
 
     public String getId() {
-
         return id;
     }
 }

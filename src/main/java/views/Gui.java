@@ -7,7 +7,6 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiWindowFlags;
 
 public class Gui {
-
     public static boolean beginCentered(String title) {
         ImGuiIO io = ImGui.getIO();
         ImVec2 pos = new ImVec2(io.getDisplayFramebufferScale().x * 0.5f, io.getDisplaySize().y * 0.5f);
