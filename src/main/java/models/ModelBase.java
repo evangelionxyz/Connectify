@@ -3,8 +3,12 @@ package models;
 public class ModelBase {
     protected String id;
 
-    ModelBase() {
+    protected ModelBase() {
         this.id = Utils.generateUUID();
+    }
+
+    protected ModelBase(String id) {
+        this.id = id;
     }
 
     public void setId(String id) {
@@ -12,6 +16,7 @@ public class ModelBase {
     }
 
     public String getId() {
+
         return id;
     }
 }
