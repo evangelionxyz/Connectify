@@ -15,7 +15,7 @@ public class Mahasiswa extends User {
     }
 
     public void participateEvent(Event e) {
-        e.addMahasiswa(this);
+        e.addMahasiswa(this.name)
     }
 
     public void addQuest(Quest q) {
