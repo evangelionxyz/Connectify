@@ -8,7 +8,7 @@ public class CommunityTest {
         Quest q1 = new Quest("mencari cwek chindo di telkom","minimal dapet lah ya");
         Quest q2 = new Quest("mencari cwek","minimal dapet lah");
         Quest q3 = new Quest("mencari 7 bola","biar kaya dragon ball");
-        Community community = new Community("Tel-U");
+        Community community = new Community("Tel-U", null);
 
         community.addQuest(q1);
         community.addQuest(q2);

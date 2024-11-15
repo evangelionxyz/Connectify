@@ -1,29 +1,36 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
 
 public class Community extends ModelBase {
     private String name;
     private List<Mahasiswa> listMahasiswa;
     private List<Quest> listQuest;
     private List<Chat> listChat;
+    private User owner;
 
-    public Community(String name) {
+    public Community(String name, User owner) {
         super();
         this.name = name;
         this.listMahasiswa = new ArrayList<>();
         this.listQuest = new ArrayList<>();
         this.listChat = new ArrayList<>();
+        this.owner = owner;
     }
 
-    public Community(String name, String id) {
+    public Community(String name, User owner, String id) {
         super(id);
         this.name = name;
         this.listMahasiswa = new ArrayList<>();
         this.listQuest = new ArrayList<>();
         this.listChat = new ArrayList<>();
+        this.owner = owner;
+    }
+
+    public User getOwner() {
+        return owner;
     }
 
     public String getName() {
@@ -74,6 +81,47 @@ public class Community extends ModelBase {
 
     public final List<Chat> getChats() {
         return listChat;
+    }
+
+    public List<String> getQuestIDs() {
+        ArrayList<String> questIds = new ArrayList<>();
+        listQuest.forEach(x -> {
+            questIds.add(x.getId());
+        });
+        return questIds;
+    }
+
+    public List<String> getChatIDs() {
+        ArrayList<String> chatIds = new ArrayList<>();
+        listChat.forEach(x -> {
+            chatIds.add(x.getId());
+        });
+        return chatIds;
+    }
+
+    public List<String> getMahasiswaIDs() {
+        ArrayList<String> mhsIds = new ArrayList<>();
+        listMahasiswa.forEach(x -> {
+            mhsIds.add(x.getId());
+        });
+        return mhsIds;
+    }
+
+    @NotNull
+    public Map<String, Object> getStringObjectMap() {
+        Map<String, Object> comData = new HashMap<>();
+        comData.put("name", name);
+        comData.put("id", id);
+
+        if (owner != null) {
+            comData.put("ownerID", owner.getId());
+        }
+
+        comData.put("mahasiswaIDs", getMahasiswaIDs());
+        comData.put("questIDs", getQuestIDs());
+        comData.put("chatIDs", getChatIDs());
+
+        return comData;
     }
 
     @Override
