@@ -12,7 +12,7 @@ public class Mahasiswa extends User {
     }
 
     public void participateEvent(Event e) {
-        e.addMahasiswa(this.name)
+        e.addMahasiswa(this.name);
     }
 
     public void addQuest(Quest q) {
