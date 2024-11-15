@@ -1,12 +1,9 @@
 package core;
 
 import com.google.api.core.ApiFuture;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.cloud.FirestoreClient;
+
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -16,110 +13,62 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImString;
+import models.Chat;
 import models.Community;
-import models.Event;
-import models.Mahasiswa;
-import java.io.FileInputStream;
-import java.io.IOException;
+import views.LoginWindow;
+
 import java.util.*;
 
 public class Application {
 
-    public static FirebaseApp firebaseApp;
-    public static Firestore firestore;
-
     private final Window window;
-
-    private List<Mahasiswa> mhsList;
-    private List<Event> eventList;
-    private List<Community> communityList;
+    private final List<Community> communityList;
     private Community selectedCommunity = new Community("Community");
+
+    private final LoginWindow loginWindow = new LoginWindow();
 
     public Application(String title) {
 
         window = new Window(1080, 720, title);
         System.out.println("Application created");
-
-        mhsList = new ArrayList<>();
-        eventList = new ArrayList<>();
         communityList = new ArrayList<>();
-
-        Mahasiswa mhs1 = new Mahasiswa("Evan", "Telkom");
-        Mahasiswa mhs2 = new Mahasiswa("Syahdan", "Telkom");
-        Mahasiswa mhs3 = new Mahasiswa("Yudha", "Telkom");
-        
-        Mahasiswa mhs4 = new Mahasiswa("Gama", "Telkom");
-        Mahasiswa mhs5 = new Mahasiswa("Gumi", "Telkom");
-        Mahasiswa mhs6 = new Mahasiswa("Benaya", "Telkom");
-
-        mhsList.add(mhs1);
-        mhsList.add(mhs2);
-        mhsList.add(mhs3);
-        mhsList.add(mhs4);
-        mhsList.add(mhs5);
-        mhsList.add(mhs6);
 
         Community offsiderCommunity = new Community("Offsider");
         Community teluCommunity = new Community("Telu");
 
-        offsiderCommunity.addMahasiswa(mhs1);
-        offsiderCommunity.addMahasiswa(mhs2);
-        offsiderCommunity.addMahasiswa(mhs3);
-
-        teluCommunity.addMahasiswa(mhs4);
-        teluCommunity.addMahasiswa(mhs5);
-        teluCommunity.addMahasiswa(mhs6);
-
         communityList.add(offsiderCommunity);
         communityList.add(teluCommunity);
+
+        loginWindow.init();
     }
 
-    public static void initializeFirebase() throws IOException {
-        // "D:/Dev/connectify-telu-firebase-adminsdk.json"
+    private void toolBar() {
+        ImGui.begin("Tool Bar");
 
-        System.out.println("[INFO] Initializing Firebase");
-        FileInputStream serviceAccount = new FileInputStream("D:/Dev/connectify-telu-firebase-adminsdk.json");
-        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-
-        FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredentials(credentials).build();
-
-        firebaseApp = FirebaseApp.initializeApp(options);
-        firestore = FirestoreClient.getFirestore(firebaseApp);
-
-        System.out.printf("[INFO] Firebase Name: %s\n", firebaseApp.getName());
-        System.out.println("[INFO] Firebase initialized");
-        System.out.println("[INFO] Firestore initialized");
-    }
-
-    private void userInfo() {
-        ImGui.begin("##user_info");
-        ImGui.text("Evangelion");
-        ImGui.end();
-    }
-
-    public static void sendMessageToFirestore(String message) {
-        try {
-            Map<String, Object> messageData = new HashMap<>();
-            messageData.put("content", message);
-            messageData.put("timestamp", FieldValue.serverTimestamp());
-            messageData.put("sender", "TestUser");
-
-            firestore.collection("messages").document()
-                    .set(messageData)
-                    .get();
-
-            System.out.printf("[INFO] Message sent: %s\n", message);
-
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to send message: " + e.getMessage());
-            e.printStackTrace();
+        if (ImGui.button("Exit")) {
+            window.close();
         }
+
+        ImGui.sameLine();
+        if (ImGui.button("Logout")) {
+            loginWindow.open();
+            AppManager.currentUser = null;
+        }
+
+        ImGui.sameLine();
+        if (AppManager.currentUser != null) {
+            ImGui.text(String.format("%s - %s", AppManager.currentUser.getName(),
+                    AppManager.currentUser.getCompany()));
+        }
+
+        ImGui.sameLine();
+
+        ImGui.end();
     }
 
     public static void readMessageFromFirestore() {
         try {
-            ApiFuture<QuerySnapshot> future = firestore.collection("messages")
+            ApiFuture<QuerySnapshot> future = AppManager.firestore.collection("messages")
                     .orderBy("timestamp", Query.Direction.DESCENDING)
                     .limit(10)
                     .get();
@@ -140,7 +89,6 @@ public class Application {
 
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to read messages: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -191,8 +139,8 @@ public class Application {
             ImGui.beginChild("##community_chats", new ImVec2(0.0f, availableHeight), true);
             ImGui.text(selectedCommunity.getName());
             ImGui.separator();
-            for (Mahasiswa mhs : selectedCommunity.getMahasiswa()) {
-                ImGui.text(mhs.toString());
+            for (Chat c : selectedCommunity.getChats()) {
+                ImGui.text(c.getMessage());
             }
             ImGui.endChild();
         }
@@ -203,7 +151,8 @@ public class Application {
 
             Runnable sendMessage = () -> {
               if (imString.get() != null && !imString.get().trim().isEmpty()) {
-                  sendMessageToFirestore(imString.get());
+                  Chat newChat = new Chat(imString.get(), AppManager.currentUser.getId());
+                  AppManager.sendMessageToDb(selectedCommunity, newChat);
                   imString.clear();
               }
             };
@@ -220,7 +169,6 @@ public class Application {
 
             ImGui.endChild();
         }
-       
         ImGui.endChild();
 
         ImGui.end();
@@ -230,8 +178,13 @@ public class Application {
         System.out.println("Application is running");
 
         window.setGuiRenderFunction(()-> {
-            userInfo();
-            communityPage();
+            loginWindow.render();
+
+            if (AppManager.currentUser != null) {
+                toolBar();
+                communityPage();
+            }
+
             ImGui.showDemoWindow();
         });
 

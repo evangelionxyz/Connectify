@@ -9,14 +9,6 @@ public class EventTest {
         Event event2 = new Event("Event 2");
         Event event3 = new Event("Event 2");
 
-        Mahasiswa mhs1 = new Mahasiswa("Evangelion", "Telkom");
-        Mahasiswa mhs2 = new Mahasiswa("Syahdan", "Telkom");
-        Mahasiswa mhs3 = new Mahasiswa("Yudha", "Telkom");
-
-        mhs1.participateEvent(event);
-        mhs2.participateEvent(event);
-        mhs3.participateEvent(event);
-
         event.printInfo();
     }
 }

@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Mahasiswa extends User {
-    private final List<Quest> questList;
-    private String university;
+    private List<Quest> questList;
 
-    public Mahasiswa(String name, String university) {
-        super(name);
-
-        this.university = university;
+    public Mahasiswa(String name, String username, String company) {
+        super(name, "Mahasiswa", username, company);
         questList = new ArrayList<>();
     }
 
@@ -20,10 +17,6 @@ public class Mahasiswa extends User {
 
     public void addQuest(Quest q) {
         questList.add(q);
-    }
-
-    public String getUniversity() {
-        return university;
     }
 
     @Override
