@@ -10,6 +10,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.*;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.hash.Bcrypt;
 import com.google.firebase.cloud.FirestoreClient;
 import models.Chat;
 import models.Community;
@@ -26,7 +27,7 @@ public class AppManager {
             Map<String, Object> messageData = new HashMap<>();
             messageData.put("content", chat.getMessage());
             messageData.put("timestamp", FieldValue.serverTimestamp());
-            messageData.put("sender", chat.getSenderId());
+            messageData.put("sender", chat.getSender());
 
             // communities -> id -> chats -> document
             DocumentReference docRef = firestore.collection("communities")
@@ -78,16 +79,26 @@ public class AppManager {
         try {
             Query query = firestore.collection("users")
                     .whereEqualTo("username", username)
-                    .whereEqualTo("password", password);
+                    .limit(1);
 
             ApiFuture<QuerySnapshot> querySnapshot = query.get();
+            QuerySnapshot snapshot = querySnapshot.get();
+
+            if (snapshot.isEmpty()) {
+                System.err.println("[Error] No user found with username: "+username);
+                return null;
+            }
+
+            QueryDocumentSnapshot userDoc = snapshot.getDocuments().get(0);
+
+            String storedHash = userDoc.getString("password");
+
 
             for (QueryDocumentSnapshot doc : querySnapshot.get().getDocuments()) {
                 String name = doc.getString("displayname");
                 String type = doc.getString("type");
                 String company = doc.getString("company");
                 String id = doc.getString("id");
-
                 User newUser = new User(name, username, type, company, password);
                 newUser.setId(id);
                 return newUser;
