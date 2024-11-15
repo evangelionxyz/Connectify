@@ -34,10 +34,6 @@ public class Community extends ModelBase {
         this.name = name;
     }
 
-    public List<Quest> getListQuest() {
-        return listQuest;
-    }
-
     public void addMahasiswa(Mahasiswa mhs) {
         if (!listMahasiswa.contains(mhs)) {
             listMahasiswa.add(mhs);
@@ -46,10 +42,6 @@ public class Community extends ModelBase {
 
     public void addChat(Chat chat) {
         listChat.add(chat);
-    }
-
-    public List<Chat> getChats() {
-        return listChat;
     }
 
     public boolean isMahasiswaExists(String id){
@@ -65,22 +57,28 @@ public class Community extends ModelBase {
         listQuest.add(quest);
     }
 
-    public void addQuestToMahasiswa(Mahasiswa mhs, Quest quest) {
+    public void setQuestToMahasiswa(Mahasiswa mhs, Quest quest) {
         if (isMahasiswaExists(mhs.getId())) {
             mhs.addQuest(quest);
         }
         System.out.println("Mahasiswa dengan NIM:" + mhs.getId() + "tidak ditemukan");
     }
 
-    public List<Mahasiswa> getMahasiswa() {
+    public final List<Mahasiswa> getMahasiswa() {
         return listMahasiswa;
     }
 
-    public void Printinfo() {
-        System.out.println("Nama Mahasiswa: " + name);
-        System.out.println("Quest yang tersedia: ");
+    public final List<Quest> getQuests() {
+        return listQuest;
+    }
 
-//        ini yang gw ubah dikit yak
+    public final List<Chat> getChats() {
+        return listChat;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Name %s: ", name);
     }
 
 }

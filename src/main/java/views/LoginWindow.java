@@ -18,9 +18,9 @@ public class LoginWindow extends WindowBase {
     private String currentLoginType;
 
     private ImString nameInput = new ImString(256);
-    private ImString userNameInput = new ImString(256);
+    private ImString usernameInput = new ImString(256);
     private ImString passwordInput = new ImString(256);
-    private ImString uniComInput = new ImString(256);
+    private ImString companyInput = new ImString(256);
 
     private ImInt imIntIndex;
 
@@ -55,15 +55,15 @@ public class LoginWindow extends WindowBase {
                 }
 
                 ImGui.inputText("Display Name", nameInput);
-                ImGui.inputText("Username", userNameInput);
+                ImGui.inputText("Username", usernameInput);
                 ImGui.inputText("Password", passwordInput, ImGuiInputTextFlags.Password);
 
                 // mahasiswa only
                 if (loginTypeIndex == 0) {
-                    ImGui.inputText("University", uniComInput);
+                    ImGui.inputText("University", companyInput);
                 }
                 else if (loginTypeIndex == 1) {
-                    ImGui.inputText("Company", uniComInput);
+                    ImGui.inputText("Company", companyInput);
                 }
 
                 ImGui.endChild();
@@ -71,14 +71,14 @@ public class LoginWindow extends WindowBase {
                 ImGui.beginChild("##login_buttons", new ImVec2(0.0f, 0.0f), true);
 
                 Runnable loginUser = () -> {
-                    if (userNameInput.isNotEmpty() && passwordInput.isNotEmpty()) {
-                        AppManager.currentUser = AppManager.loginUser(userNameInput.get(), passwordInput.get());
+                    if (usernameInput.isNotEmpty() && passwordInput.isNotEmpty()) {
+                        AppManager.currentUser = AppManager.loginUser(usernameInput.get(), passwordInput.get());
                     }
 
                     if (AppManager.currentUser != null) {
                         passwordInput.clear();
-                        uniComInput.clear();
-                        userNameInput.clear();
+                        companyInput.clear();
+                        usernameInput.clear();
                         this.close();
                     }
                 };
@@ -90,20 +90,20 @@ public class LoginWindow extends WindowBase {
                 ImGui.sameLine();
 
                 Runnable registerUser = () -> {
-                    if (userNameInput.isNotEmpty() && passwordInput.isNotEmpty() && uniComInput.isNotEmpty()) {
+                    if (usernameInput.isNotEmpty() && passwordInput.isNotEmpty() && companyInput.isNotEmpty()) {
                         if (loginTypeIndex == 0) {
-                            AppManager.currentUser = new Mahasiswa(nameInput.get(), userNameInput.get(), uniComInput.get());
+                            AppManager.currentUser = new Mahasiswa(nameInput.get(), usernameInput.get(), companyInput.get());
                         }
                         else if (loginTypeIndex == 1) {
-                            AppManager.currentUser = new HRD(nameInput.get(), userNameInput.get(), uniComInput.get());
+                            AppManager.currentUser = new HRD(nameInput.get(), usernameInput.get(), companyInput.get());
                         }
                         AppManager.currentUser.setPassword(passwordInput.get());
                     }
 
                     if (AppManager.currentUser != null) {
                         passwordInput.clear();
-                        uniComInput.clear();
-                        userNameInput.clear();
+                        companyInput.clear();
+                        usernameInput.clear();
 
                         if (AppManager.registerUser(AppManager.currentUser)) {
                             this.close();

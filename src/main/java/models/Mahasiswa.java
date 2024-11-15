@@ -4,19 +4,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Mahasiswa extends User {
-    private List<Quest> questList;
+    private List<Quest> quests;
+    private List<Achievement> achievements;
 
     public Mahasiswa(String name, String username, String company) {
         super(name, "Mahasiswa", username, company);
-        questList = new ArrayList<>();
+        quests = new ArrayList<>();
     }
 
     public void participateEvent(Event e) {
-        e.addMahasiswa(this.name);
+        e.addMahasiswa(this);
     }
 
     public void addQuest(Quest q) {
-        questList.add(q);
+        quests.add(q);
+    }
+
+    public void addAchievement(Achievement ach) {
+        achievements.add(ach);
+    }
+
+    public final List<Achievement> getAchievement() {
+        return achievements;
     }
 
     @Override
