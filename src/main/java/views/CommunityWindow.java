@@ -81,8 +81,10 @@ public class CommunityWindow extends WindowBase {
                     }
 
                     if (ImGui.isItemHovered() && ImGui.isItemClicked(ImGuiMouseButton.Right)) {
-                        ImGui.openPopup("##community_context_menu", ImGuiPopupFlags.AnyPopupLevel);
-                        communityContextOpen = cm;
+                        if (cm.getOwner().getId().equals(AppManager.currentUser.getId())) {
+                            ImGui.openPopup("##community_context_menu", ImGuiPopupFlags.AnyPopupLevel);
+                            communityContextOpen = cm;
+                        }
                     }
 
                     if (communityContextOpen != null) {
