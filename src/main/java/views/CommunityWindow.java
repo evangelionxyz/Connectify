@@ -1,7 +1,6 @@
 package views;
 
 import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.FieldValue;
 
 import core.AppManager;
 import imgui.ImGui;
@@ -12,8 +11,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import models.Chat;
 import models.Community;
-
-import java.sql.Time;
 
 public class CommunityWindow extends WindowBase {
 
@@ -28,7 +25,7 @@ public class CommunityWindow extends WindowBase {
         Runnable create = () -> {
             if (nameInput.isNotEmpty()) {
                 Community com = new Community(nameInput.get(), AppManager.currentUser);
-                AppManager.createCommunity(com);
+                AppManager.storeCommunityToDatabase(com);
             }
         };
 

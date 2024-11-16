@@ -23,19 +23,6 @@ public class AppManager {
     public static Community selectedCommunity = null;
     public static List<Community> communities = new ArrayList<>();
 
-    public static void storeChatToDatabase(Chat chat) {
-        try {
-            Map<String, Object> chatData = chat.getStringObjectMap();
-            // chats -> chat id
-            DocumentReference docRef = firestore.collection("chats").document(chat.getId());
-            ApiFuture<WriteResult> result = docRef.set(chatData);
-            // wait for write to complete
-            WriteResult writeResult = result.get();
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to send message: "+e.getMessage());
-        }
-    }
-
     public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = user.getStringObjectMap();
@@ -132,7 +119,7 @@ public class AppManager {
         }
     }
 
-    public static void createCommunity(Community community) {
+    public static void storeCommunityToDatabase(Community community) {
         try {
             Map<String, Object> comData = community.getStringObjectMap();
             // get collection's document communities -> document by id
@@ -141,10 +128,22 @@ public class AppManager {
             ApiFuture<WriteResult> result = docRef.set(comData);
             // wait for write
             WriteResult writeResult = result.get();
-            communities.add(community);
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to create community");
             throw new RuntimeException();
+        }
+    }
+
+    public static void storeChatToDatabase(Chat chat) {
+        try {
+            Map<String, Object> chatData = chat.getStringObjectMap();
+            // chats -> chat id
+            DocumentReference docRef = firestore.collection("chats").document(chat.getId());
+            ApiFuture<WriteResult> result = docRef.set(chatData);
+            // wait for write to complete
+            WriteResult writeResult = result.get();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to send message: "+e.getMessage());
         }
     }
 
@@ -176,7 +175,6 @@ public class AppManager {
 
         // initialize communities
         startListeningToCommunities();
-        loadCommunities();
     }
 
     private static void startListeningToCommunities() {
@@ -197,23 +195,18 @@ public class AppManager {
                    // handle based on the type of change
                    switch (change.getType()) {
                        case ADDED -> {
-                           if (localCommunity != null) {
-                               Community newCommunity = createCommunityFromDocument(change.getDocument());
-                               communities.add(newCommunity);
-                           }
-                           break;
+                           Community newCommunity = createCommunityFromDocument(change.getDocument());
+                           communities.add(newCommunity);
                        }
                        case MODIFIED -> {
                            if (localCommunity != null) {
                                updateLocalCommunity(localCommunity, change.getDocument());
                            }
-                           break;
                        }
                        case REMOVED -> {
                            if (localCommunity != null) {
                                communities.remove(localCommunity);
                            }
-                           break;
                        }
                    }
                }
@@ -226,7 +219,17 @@ public class AppManager {
         String ownerId = doc.getString("ownerID");
         User owner = getUserById(ownerId);
         Community com = new Community(name, owner);
-        com.setId(doc.getId());
+
+        // load chats
+        ArrayList<String> chats = (ArrayList<String>)doc.get("chatIDs");
+        assert chats != null;
+        chats.forEach(x -> {
+            Chat c = getChatById(x);
+            if (c != null) {
+                com.addChat(c);
+            }
+        });
+
         return com;
     }
 
@@ -250,41 +253,4 @@ public class AppManager {
         community.setName(name);
         community.setId(id);
     }
-
-    private static void loadCommunities() {
-        // load all 'communities' from firestore
-        try {
-            ApiFuture<QuerySnapshot> q = firestore.collection("communities").get();
-            QuerySnapshot querySnapshot = q.get();
-            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                String name = doc.getString("name");
-                String id = doc.getString("id");
-                String ownerId = doc.getString("ownerID");
-                User owner = getUserById(ownerId);
-
-                Community com = new Community(name, owner);
-
-                // load chats
-                ArrayList<String> chats = (ArrayList<String>)doc.get("chatIDs");
-                assert chats != null;
-                chats.forEach(x -> {
-                    Chat c = getChatById(x);
-                    if (c != null) {
-                        com.addChat(c);
-                    }
-                });
-                com.setId(id);
-
-                communities.add(com);
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private List<Chat> loadChats() {
-        return null;
-    }
-
 }
