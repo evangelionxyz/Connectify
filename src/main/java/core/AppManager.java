@@ -110,30 +110,6 @@ public class AppManager {
         }
     }
 
-    public static Community getCommunityById(String comId) {
-        try {
-            QuerySnapshot q = getQueryByFieldValue("communities", "id", comId);
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void storeCommunityToDatabase(Community community) {
-        try {
-            Map<String, Object> comData = community.getStringObjectMap();
-            // get collection's document communities -> document by id
-            DocumentReference docRef = firestore.collection("communities").document(community.getId());
-            // write to firestore
-            ApiFuture<WriteResult> result = docRef.set(comData);
-            // wait for write
-            WriteResult writeResult = result.get();
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to create community");
-            throw new RuntimeException();
-        }
-    }
-
     public static void storeChatToDatabase(Chat chat) {
         try {
             Map<String, Object> chatData = chat.getStringObjectMap();
@@ -174,10 +150,14 @@ public class AppManager {
         firestore = FirestoreClient.getFirestore(firebaseApp);
 
         // initialize communities
-        startListeningToCommunities();
+        communityStartListening();
     }
 
-    private static void startListeningToCommunities() {
+
+    /// ------------------------------------
+    /// Communities section
+    /// ------------------------------------
+    private static void communityStartListening() {
         firestore.collection("communities").addSnapshotListener((snapshot, error) -> {
            if (error != null) {
                System.err.println("[ERROR]  Listening failed: "+error);
@@ -195,12 +175,12 @@ public class AppManager {
                    // handle based on the type of change
                    switch (change.getType()) {
                        case ADDED -> {
-                           Community newCommunity = createCommunityFromDocument(change.getDocument());
+                           Community newCommunity = communityCreateFromDocument(change.getDocument());
                            communities.add(newCommunity);
                        }
                        case MODIFIED -> {
                            if (localCommunity != null) {
-                               updateLocalCommunity(localCommunity, change.getDocument());
+                               communityUpdateLocal(localCommunity, change.getDocument());
                            }
                        }
                        case REMOVED -> {
@@ -214,9 +194,32 @@ public class AppManager {
         });
     }
 
-    private static Community createCommunityFromDocument(DocumentSnapshot doc) {
+    public static void createCommunityToDatabase(Community community) {
+        try {
+            Map<String, Object> comData = community.getStringObjectMap();
+            DocumentReference docRef = firestore.collection("communities").document(community.getId());
+            ApiFuture<WriteResult> result = docRef.set(comData);
+            WriteResult writeResult = result.get();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to create community");
+            throw new RuntimeException();
+        }
+    }
+
+    public static void removeCommunityFromDatabase(Community community) {
+        try {
+            DocumentReference docRef = firestore.collection("communities").document(community.getId());
+            ApiFuture<WriteResult> result = docRef.delete();
+            WriteResult writeResult = result.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Community communityCreateFromDocument(DocumentSnapshot doc) {
         String name = doc.getString("name");
         String ownerId = doc.getString("ownerID");
+        String id = doc.getString("id");
         User owner = getUserById(ownerId);
         Community com = new Community(name, owner);
 
@@ -229,11 +232,11 @@ public class AppManager {
                 com.addChat(c);
             }
         });
-
+        com.setId(id);
         return com;
     }
 
-    private static void updateLocalCommunity(Community community, DocumentSnapshot doc) {
+    private static void communityUpdateLocal(Community community, DocumentSnapshot doc) {
         String name = doc.getString("name");
         String id = doc.getString("id");
 
@@ -248,7 +251,6 @@ public class AppManager {
                 chats.add(c);
             }
         });
-
         community.setChats(chats);
         community.setName(name);
         community.setId(id);

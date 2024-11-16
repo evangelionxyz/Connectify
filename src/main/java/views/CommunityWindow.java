@@ -18,6 +18,8 @@ public class CommunityWindow extends WindowBase {
     private ImString nameInput = new ImString(256);
     private ImString userChatInput = new ImString(256);
 
+    private Community communityContextOpen = null;
+
     private void createWindow() {
         ImGui.begin("Create new Community", imCreateWin, ImGuiWindowFlags.AlwaysAutoResize);
         ImGui.inputText("Name", nameInput);
@@ -25,7 +27,7 @@ public class CommunityWindow extends WindowBase {
         Runnable create = () -> {
             if (nameInput.isNotEmpty()) {
                 Community com = new Community(nameInput.get(), AppManager.currentUser);
-                AppManager.storeCommunityToDatabase(com);
+                AppManager.createCommunityToDatabase(com);
             }
         };
 
@@ -56,7 +58,7 @@ public class CommunityWindow extends WindowBase {
             }
 
             ImGui.begin("Community", show);
-            ImGui.beginChild("##community", new ImVec2(300.0f, 0.0f), true);
+            ImGui.beginChild("##community", new ImVec2(210.0f, 0.0f), true);
 
             // Calculate height for the main chat content based on remaining space.
             final float bottomHeight = 25.0f;
@@ -66,7 +68,9 @@ public class CommunityWindow extends WindowBase {
                 ImGui.beginChild("##community_list", new ImVec2(0.0f, availableHeight), true);
                 for (Community cm : AppManager.communities) {
                     boolean selected = AppManager.selectedCommunity.getId().equals(cm.getId());
-                    int treeFlags = (selected ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.None) | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.SpanFullWidth;
+                    int treeFlags = (selected ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.None) | ImGuiTreeNodeFlags.Leaf
+                            | ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.SpanFullWidth;
+
                     if (selected) ImGui.pushStyleColor(ImGuiCol.Header, new ImVec4(0.123f, 0.123f, 0.7633f, 1.0f));
                     ImGui.pushStyleColor(ImGuiCol.HeaderHovered, new ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
                     ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, new ImVec2(10.0f, 10.0f));
@@ -75,6 +79,21 @@ public class CommunityWindow extends WindowBase {
                     if (ImGui.isItemClicked(ImGuiMouseButton.Left)) {
                         AppManager.selectedCommunity = cm;
                     }
+
+                    if (ImGui.isItemHovered() && ImGui.isItemClicked(ImGuiMouseButton.Right)) {
+                        ImGui.openPopup("##community_context_menu", ImGuiPopupFlags.AnyPopupLevel);
+                        communityContextOpen = cm;
+                    }
+
+                    if (communityContextOpen != null) {
+                        if (ImGui.beginPopup("##community_context_menu")) {
+                            if (ImGui.menuItem("Delete")) {
+                                AppManager.removeCommunityFromDatabase(communityContextOpen);
+                            }
+                            ImGui.endPopup();
+                        }
+                    }
+
                     if (opened) {
                         ImGui.treePop();
                     }
@@ -83,6 +102,7 @@ public class CommunityWindow extends WindowBase {
                     if (selected)
                         ImGui.popStyleColor(1);
                 }
+
                 ImGui.endChild(); // community_list
             }
 
