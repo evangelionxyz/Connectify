@@ -17,7 +17,7 @@ public class Application {
     private final HRDWindow hrdWindow = new HRDWindow();
 
     public Application(String title) {
-        window = new Window(1080, 720, title);
+        window = new Window(1080, 640, title);
         System.out.println("Application created");
         loginWindow.init();
         communityWindow.init();
