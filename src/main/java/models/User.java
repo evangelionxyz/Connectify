@@ -1,5 +1,11 @@
 package models;
 
+import core.EncryptionUtils;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class User extends ModelBase {
     protected String password;
     protected String name;
@@ -24,6 +30,14 @@ public class User extends ModelBase {
         this.password = password;
     }
 
+    public boolean isMahasiswa() {
+        return type.equalsIgnoreCase("mahasiswa");
+    }
+
+    public boolean isHRD() {
+        return type.equalsIgnoreCase("hrd");
+    }
+
     public void setPassword(String password) {
         this.password = password;
     }
@@ -46,5 +60,25 @@ public class User extends ModelBase {
 
     public String getType() {
         return type;
+    }
+
+    @NotNull
+    public Map<String, Object> getStringObjectMap() {
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("username", username);
+        userData.put("displayname", name);
+        userData.put("type", type);
+        userData.put("company", company);
+
+        // encrypt the password before storing
+        String encryptedPassword;
+        try {
+            encryptedPassword = EncryptionUtils.encrypt(password, EncryptionUtils.getGlobalSecretKey());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        userData.put("password", encryptedPassword);
+        userData.put("id", id);
+        return userData;
     }
 }

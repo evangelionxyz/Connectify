@@ -19,12 +19,11 @@ public class EncryptionUtils {
         return globalSecretKey;
     }
 
-    public static SecretKey generateSecretKey() {
+    public static void initialize() {
         try {
             String base64Key = loadKeyFromFile();
             byte[] decodedKey = Base64.getDecoder().decode(base64Key);
             globalSecretKey = new SecretKeySpec(decodedKey, ALGORITHM);
-            return globalSecretKey;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

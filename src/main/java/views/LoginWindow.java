@@ -4,15 +4,13 @@ import core.AppManager;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.ImVec2;
+import imgui.ImVec4;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import core.EncryptionUtils;
 import models.HRD;
 import models.Mahasiswa;
-
-import javax.crypto.SecretKey;
 
 public class LoginWindow extends WindowBase {
 
@@ -20,10 +18,13 @@ public class LoginWindow extends WindowBase {
     private String[] loginTypes;
     private String currentLoginType;
 
-    private ImString nameInput = new ImString(256);
-    private ImString usernameInput = new ImString(256);
-    private ImString passwordInput = new ImString(256);
-    private ImString companyInput = new ImString(256);
+    private final ImString nameInput = new ImString(256);
+    private final ImString usernameInput = new ImString(256);
+    private final ImString passwordInput = new ImString(256);
+    private final ImString companyInput = new ImString(256);
+
+    private boolean showErrorMessage = false;
+    private String errorMessage;
 
     private ImInt imIntIndex;
 
@@ -69,20 +70,38 @@ public class LoginWindow extends WindowBase {
                     ImGui.inputText("Company", companyInput);
                 }
 
+                if (showErrorMessage) {
+                    showErrorMessage();
+                }
+
                 ImGui.endChild();
 
                 ImGui.beginChild("##login_buttons", new ImVec2(0.0f, 0.0f), true);
 
                 Runnable loginUser = () -> {
+                    showErrorMessage = false;
                     if (usernameInput.isNotEmpty() && passwordInput.isNotEmpty()) {
                         AppManager.currentUser = AppManager.loginUser(usernameInput.get(), passwordInput.get());
                     }
 
                     if (AppManager.currentUser != null) {
+                        nameInput.clear();
                         passwordInput.clear();
                         companyInput.clear();
                         usernameInput.clear();
                         this.close();
+                    }
+                    else {
+                        showErrorMessage = true;
+                        if (usernameInput.isEmpty()) {
+                            errorMessage = "Username could not be empty";
+                        } else if (passwordInput.isEmpty()) {
+                            errorMessage = "Password could not be empty";
+                        } else if (usernameInput.isEmpty() && passwordInput.isEmpty()) {
+                            errorMessage = "Username and password could not be empty";
+                        } else {
+                            errorMessage = "Your username or password is incorrect";
+                        }
                     }
                 };
 
@@ -93,7 +112,8 @@ public class LoginWindow extends WindowBase {
                 ImGui.sameLine();
 
                 Runnable registerUser = () -> {
-                    if (usernameInput.isNotEmpty() && passwordInput.isNotEmpty() && companyInput.isNotEmpty()) {
+                    showErrorMessage = false;
+                    if (nameInput.isNotEmpty() && usernameInput.isNotEmpty() && passwordInput.isNotEmpty() && companyInput.isNotEmpty()) {
                         if (loginTypeIndex == 0) {
                             AppManager.currentUser = new Mahasiswa(nameInput.get(), usernameInput.get(), companyInput.get());
                         }
@@ -104,17 +124,17 @@ public class LoginWindow extends WindowBase {
                     }
 
                     if (AppManager.currentUser != null) {
-                        passwordInput.clear();
-                        companyInput.clear();
-                        usernameInput.clear();
-
-                        try {
-                            SecretKey key = EncryptionUtils.generateSecretKey();
-                            if (AppManager.registerUser(AppManager.currentUser, key)) {
-                                this.close();
-                            }
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
+                        if (AppManager.registerUser(AppManager.currentUser)) {
+                            nameInput.clear();
+                            passwordInput.clear();
+                            companyInput.clear();
+                            usernameInput.clear();
+                            this.close();
+                        }
+                    } else {
+                        showErrorMessage = true;
+                        if (passwordInput.isEmpty()|| nameInput.isEmpty() || usernameInput.isEmpty() || companyInput.isEmpty()) {
+                            errorMessage = "Please fill the forms to register";
                         }
                     }
                 };
@@ -128,5 +148,9 @@ public class LoginWindow extends WindowBase {
                 ImGui.end();
             }
         }
+    }
+
+    private void showErrorMessage() {
+        ImGui.textColored(new ImVec4(1.0f, 0.0f, 0.0f, 1.0f), errorMessage);
     }
 }

@@ -8,7 +8,7 @@ public class Mahasiswa extends User {
     private List<Achievement> achievements;
 
     public Mahasiswa(String name, String username, String company) {
-        super(name, "Mahasiswa", username, company);
+        super(name, username, "MAHASISWA", company);
         quests = new ArrayList<>();
     }
 

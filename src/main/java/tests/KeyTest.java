@@ -6,7 +6,8 @@ import javax.crypto.SecretKey;
 
 public class KeyTest {
     public static void main(String[] args) throws Exception {
-        SecretKey key = EncryptionUtils.generateSecretKey();
+        EncryptionUtils.initialize();
+        SecretKey key = EncryptionUtils.getGlobalSecretKey();
         String encryptedPassword = EncryptionUtils.encrypt("myPassword123", key);
         String decryptedPassword = EncryptionUtils.decrypt(encryptedPassword, key);
 
