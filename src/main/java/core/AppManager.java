@@ -23,19 +23,6 @@ public class AppManager {
     public static Community selectedCommunity = null;
     public static List<Community> communities = new ArrayList<>();
 
-    public static void storeChatToDatabase(Chat chat) {
-        try {
-            Map<String, Object> chatData = chat.getStringObjectMap();
-            // chats -> chat id
-            DocumentReference docRef = firestore.collection("chats").document(chat.getId());
-            ApiFuture<WriteResult> result = docRef.set(chatData);
-            // wait for write to complete
-            WriteResult writeResult = result.get();
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to send message: "+e.getMessage());
-        }
-    }
-
     public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = user.getStringObjectMap();
@@ -123,28 +110,16 @@ public class AppManager {
         }
     }
 
-    public static Community getCommunityById(String comId) {
+    public static void storeChatToDatabase(Chat chat) {
         try {
-            QuerySnapshot q = getQueryByFieldValue("communities", "id", comId);
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void createCommunity(Community community) {
-        try {
-            Map<String, Object> comData = community.getStringObjectMap();
-            // get collection's document communities -> document by id
-            DocumentReference docRef = firestore.collection("communities").document(community.getId());
-            // write to firestore
-            ApiFuture<WriteResult> result = docRef.set(comData);
-            // wait for write
+            Map<String, Object> chatData = chat.getStringObjectMap();
+            // chats -> chat id
+            DocumentReference docRef = firestore.collection("chats").document(chat.getId());
+            ApiFuture<WriteResult> result = docRef.set(chatData);
+            // wait for write to complete
             WriteResult writeResult = result.get();
-            communities.add(community);
         } catch (Exception e) {
-            System.err.println("[ERROR] Failed to create community");
-            throw new RuntimeException();
+            System.err.println("[ERROR] Failed to send message: "+e.getMessage());
         }
     }
 
@@ -175,44 +150,109 @@ public class AppManager {
         firestore = FirestoreClient.getFirestore(firebaseApp);
 
         // initialize communities
-        loadCommunities();
+        communityStartListening();
     }
 
-    private static void loadCommunities() {
-        // load all 'communities' from firestore
+
+    /// ------------------------------------
+    /// Communities section
+    /// ------------------------------------
+    private static void communityStartListening() {
+        firestore.collection("communities").addSnapshotListener((snapshot, error) -> {
+           if (error != null) {
+               System.err.println("[ERROR]  Listening failed: "+error);
+               return;
+           }
+
+           if (snapshot != null) {
+               for (DocumentChange change : snapshot.getDocumentChanges()) {
+                   String docId = change.getDocument().getId();
+                   // find if the document ID matches a local community
+                   Community localCommunity = communities.stream()
+                           .filter(c -> c.getId().equals(docId))
+                           .findFirst()
+                           .orElse(null);
+                   // handle based on the type of change
+                   switch (change.getType()) {
+                       case ADDED -> {
+                           Community newCommunity = communityCreateFromDocument(change.getDocument());
+                           communities.add(newCommunity);
+                       }
+                       case MODIFIED -> {
+                           if (localCommunity != null) {
+                               communityUpdateLocal(localCommunity, change.getDocument());
+                           }
+                       }
+                       case REMOVED -> {
+                           if (localCommunity != null) {
+                               communities.remove(localCommunity);
+                           }
+                       }
+                   }
+               }
+           }
+        });
+    }
+
+    public static void createCommunityToDatabase(Community community) {
         try {
-            ApiFuture<QuerySnapshot> q = firestore.collection("communities").get();
-            QuerySnapshot querySnapshot = q.get();
-            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                String name = doc.getString("name");
-                String id = doc.getString("id");
-                String ownerId = doc.getString("ownerID");
-                User owner = getUserById(ownerId);
+            Map<String, Object> comData = community.getStringObjectMap();
+            DocumentReference docRef = firestore.collection("communities").document(community.getId());
+            ApiFuture<WriteResult> result = docRef.set(comData);
+            WriteResult writeResult = result.get();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to create community");
+            throw new RuntimeException();
+        }
+    }
 
-                Community com = new Community(name, owner);
-
-                // load chats
-                ArrayList<String> chats = (ArrayList<String>)doc.get("chatIDs");
-                assert chats != null;
-                chats.forEach(x -> {
-                    Chat c = getChatById(x);
-                    if (c != null) {
-                        com.addChat(c);
-                    }
-                });
-
-                com.setId(id);
-
-                communities.add(com);
-            }
-
+    public static void removeCommunityFromDatabase(Community community) {
+        try {
+            DocumentReference docRef = firestore.collection("communities").document(community.getId());
+            ApiFuture<WriteResult> result = docRef.delete();
+            WriteResult writeResult = result.get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private List<Chat> loadChats() {
-        return null;
+    private static Community communityCreateFromDocument(DocumentSnapshot doc) {
+        String name = doc.getString("name");
+        String ownerId = doc.getString("ownerID");
+        String id = doc.getString("id");
+        User owner = getUserById(ownerId);
+        Community com = new Community(name, owner);
+
+        // load chats
+        ArrayList<String> chats = (ArrayList<String>)doc.get("chatIDs");
+        assert chats != null;
+        chats.forEach(x -> {
+            Chat c = getChatById(x);
+            if (c != null) {
+                com.addChat(c);
+            }
+        });
+        com.setId(id);
+        return com;
     }
 
+    private static void communityUpdateLocal(Community community, DocumentSnapshot doc) {
+        String name = doc.getString("name");
+        String id = doc.getString("id");
+
+        // load chats
+        ArrayList<String> chatIDs = (ArrayList<String>)doc.get("chatIDs");
+        ArrayList<Chat> chats = new ArrayList<>();
+
+        assert chatIDs != null;
+        chatIDs.forEach(x -> {
+            Chat c = getChatById(x);
+            if (c != null) {
+                chats.add(c);
+            }
+        });
+        community.setChats(chats);
+        community.setName(name);
+        community.setId(id);
+    }
 }

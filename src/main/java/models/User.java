@@ -30,6 +30,14 @@ public class User extends ModelBase {
         this.password = password;
     }
 
+    public boolean isMahasiswa() {
+        return type.equalsIgnoreCase("mahasiswa");
+    }
+
+    public boolean isHRD() {
+        return type.equalsIgnoreCase("hrd");
+    }
+
     public void setPassword(String password) {
         this.password = password;
     }
