@@ -11,7 +11,6 @@ public class Quest extends ModelBase {
         this.isCompleted = false;
     }
 
-
     public void doQuest() {
         if (isCompleted) {
             System.out.println("Quest Telah Dikerjakan");

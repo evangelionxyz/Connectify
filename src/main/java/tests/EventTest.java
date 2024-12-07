@@ -61,7 +61,7 @@ public class EventTest {
 
         System.out.println("Quest yang Wajib dikerjakan:");
         for (Quest quest : hackathon.getQuests()) {
-            System.out.println(quest);
+            System.out.println(quest.getTitle());
         }
     }
 
