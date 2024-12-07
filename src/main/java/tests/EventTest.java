@@ -9,11 +9,10 @@ import java.util.List;
 
 public class EventTest extends ModelBase {
     public static void main(String[] args) {
-
         Mahasiswa pemilik = new Mahasiswa("evan", "evan", "telu");
         Community community = new Community("Offsider", pemilik);
 
-        Event hackathon = new Event(community, "Hackthon 2024");
+        Event hackathon = new Event(community, "Hackathon 2024");
 
         Mahasiswa syahdan = new Mahasiswa("syahdan", "syahdan", "telu");
         Mahasiswa yudha = new Mahasiswa("yuda", "yuda", "telu");
