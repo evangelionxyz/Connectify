@@ -10,7 +10,7 @@ public class Event extends ModelBase {
 
     private final Community owner;
 
-    Event(Community owner, String title) {
+    public Event(Community owner, String title) {
         super();
         this.title = title;
         this.owner = owner;
@@ -23,6 +23,10 @@ public class Event extends ModelBase {
 
     public void addMahasiswa(Mahasiswa mhs) {
         mahasiswa.add(mhs);
+    }
+
+    public void addQuest(Quest quest) {
+        quests.add(quest);
     }
 
     public Mahasiswa findMahasiswa(String username) {

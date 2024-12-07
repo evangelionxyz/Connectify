@@ -1,11 +1,30 @@
 package tests;
 
+import models.Community;
+import models.Event;
+import models.Mahasiswa;
 import models.ModelBase;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EventTest extends ModelBase {
     public static void main(String[] args) {
+
+        Mahasiswa pemilik = new Mahasiswa("evan", "evan", "telu");
+        Community community = new Community("Offsider", pemilik);
+
+        Event hackathon = new Event(community, "Hackthon 2024");
+
+        Mahasiswa syahdan = new Mahasiswa("syahdan", "syahdan", "telu");
+        Mahasiswa yudha = new Mahasiswa("yuda", "yuda", "telu");
+        Mahasiswa nopal = new Mahasiswa("nopal", "nopal", "telu");
+        hackathon.addMahasiswa(syahdan);
+        hackathon.addMahasiswa(yudha);
+        hackathon.addMahasiswa(nopal);
+
+        for (Mahasiswa m : hackathon.getMahasiswa()) {
+            System.out.println(m);
+        }
 
         String eventOwner = "HRD";
         String eventTitle = "Heckaton";
