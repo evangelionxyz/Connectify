@@ -40,3 +40,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/connectify-telu-aes-key.txt
+/connectify-telu-firebase-adminsdk.json
