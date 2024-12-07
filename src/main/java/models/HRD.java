@@ -14,7 +14,7 @@ public class HRD extends User {
     public Event addEvent(Community owner, String eventName) {
         Event newEvent = new Event(owner, eventName);
         events.add(newEvent);
-        System.out.println("Event " + eventName + "berhasil berhasil dibuat" + getName());
+        System.out.println("Event " + eventName + " berhasil berhasil dibuat " + getName());
         return newEvent;
     }
 
