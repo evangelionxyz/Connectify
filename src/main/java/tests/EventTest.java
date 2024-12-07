@@ -3,11 +3,11 @@ package tests;
 import models.Community;
 import models.Event;
 import models.Mahasiswa;
-import models.ModelBase;
+import models.Quest;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventTest extends ModelBase {
+public class EventTest {
     public static void main(String[] args) {
 
         Mahasiswa pemilik = new Mahasiswa("evan", "evan", "telu");
@@ -22,15 +22,25 @@ public class EventTest extends ModelBase {
         hackathon.addMahasiswa(yudha);
         hackathon.addMahasiswa(nopal);
 
+        Quest quest1 = new Quest("Buat Presentasi", "Membuat Presentasi tentang C++");
+        Quest quest2 = new Quest("Bentuk Kelompok", "Buat Kelompok Maksimal 5 orang dan berfoto bersama mereka");
+        Quest quest3 = new Quest("Membuat Program", "Buatlah Program");
+        Quest quest4 = new Quest("Buatlah Desain Sederhana", "Buat Desain sederhana yang memiliki arti");
+
+        hackathon.addQuest(quest1);
+        hackathon.addQuest(quest2);
+        hackathon.addQuest(quest3);
+        hackathon.addQuest(quest4);
+
+        System.out.println("Mahasiswa yang terdaftar pada event:");
         for (Mahasiswa m : hackathon.getMahasiswa()) {
-            System.out.println(m);
+            System.out.println("- " + m);
         }
 
         String eventOwner = "HRD";
-        String eventTitle = "Heckaton";
+        String eventTitle = "Hackthon 2024";
 
         List<String> students = new ArrayList<>();
-
         students.add("Evangelion");
         students.add("Yudha Harwanto");
         students.add("Yuli");
@@ -49,6 +59,11 @@ public class EventTest extends ModelBase {
             System.out.println("Mahasiswa ditemukan: " + foundStudent);
         } else {
             System.out.println("Mahasiswa tidak ditemukan.");
+        }
+
+        System.out.println("Quest dalam event:");
+        for (Quest quest : hackathon.getQuests()) {
+            System.out.println(quest);
         }
     }
 
