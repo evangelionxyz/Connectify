@@ -26,7 +26,6 @@ public class EventTest {
         Quest quest2 = new Quest("Bentuk Kelompok", "Buat Kelompok Maksimal 5 orang dan berfoto bersama mereka");
         Quest quest3 = new Quest("Membuat Program", "Buatlah Program");
         Quest quest4 = new Quest("Buatlah Desain Sederhana", "Buat Desain sederhana yang memiliki arti");
-
         hackathon.addQuest(quest1);
         hackathon.addQuest(quest2);
         hackathon.addQuest(quest3);
@@ -61,7 +60,7 @@ public class EventTest {
             System.out.println("Mahasiswa tidak ditemukan.");
         }
 
-        System.out.println("Quest dalam event:");
+        System.out.println("Quest yang Wajib dikerjakan:");
         for (Quest quest : hackathon.getQuests()) {
             System.out.println(quest);
         }

@@ -15,6 +15,7 @@ public class Event extends ModelBase {
         this.title = title;
         this.owner = owner;
         this.mahasiswa = new ArrayList<>();
+        this.quests = new ArrayList<>();
     }
 
     public void setTitle(String title) {
@@ -27,6 +28,10 @@ public class Event extends ModelBase {
 
     public void addQuest(Quest quest) {
         quests.add(quest);
+    }
+    
+    public List<Quest> getQuests() {
+        return quests;
     }
 
     public Mahasiswa findMahasiswa(String username) {
