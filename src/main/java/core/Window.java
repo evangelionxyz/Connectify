@@ -99,7 +99,8 @@ public class Window {
     }
 
     public void pollEvents() {
-        glfwWaitEvents();
+        //glfwWaitEvents();
+        glfwPollEvents();
     }
 
     private void applyTheme() {
