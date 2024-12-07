@@ -20,7 +20,4 @@ public class ModelBase {
     public String getId() {
         return id;
     }
-
-    public Quest[] getQuests() {
-    }
 }
