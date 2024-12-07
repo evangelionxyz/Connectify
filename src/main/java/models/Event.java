@@ -1,5 +1,6 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Event extends ModelBase {
@@ -13,6 +14,7 @@ public class Event extends ModelBase {
         super();
         this.title = title;
         this.owner = owner;
+        this.mahasiswa = new ArrayList<>();
     }
 
     public void setTitle(String title) {
