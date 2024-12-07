@@ -5,7 +5,7 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import imgui.ImGui;
 import views.CommunityWindow;
-import views.HRDWindow;
+//import views.HRDWindow;
 import views.LoginWindow;
 import java.util.*;
 
@@ -14,14 +14,14 @@ public class Application {
     private final Window window;
     private final LoginWindow loginWindow = new LoginWindow();
     private final CommunityWindow communityWindow = new CommunityWindow();
-    private final HRDWindow hrdWindow = new HRDWindow();
+   // private final HRDWindow hrdWindow = new HRDWindow();
 
     public Application(String title) {
         window = new Window(1080, 640, title);
         System.out.println("Application created");
         loginWindow.init();
         communityWindow.init();
-        hrdWindow.init();
+      //  hrdWindow.init();
     }
 
     private void toolBar() {
@@ -84,7 +84,7 @@ public class Application {
                 toolBar();
                 communityWindow.render();
                 if (AppManager.currentUser.isHRD()) {
-                    hrdWindow.render();
+                   // hrdWindow.render();
                 }
             }
             ImGui.showDemoWindow();
