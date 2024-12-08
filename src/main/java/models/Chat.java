@@ -10,12 +10,16 @@ public class Chat extends ModelBase {
     private String message;
     private Timestamp timestamp;
     private User sender;
-    private String imageId;
+    protected String type;
+
+    public Chat() {
+    }
 
     public Chat(String message, Timestamp timestamp, User sender) {
         this.message = message;
         this.timestamp = timestamp;
         this.sender = sender;
+        this.type = "default";
     }
 
     public void setMessage(String message) {
@@ -37,6 +41,8 @@ public class Chat extends ModelBase {
     public final User getSender() {
         return sender;
     }
+
+    public final String getType() { return this.type; }
 
     @NotNull
     public Map<String, Object> getStringObjectMap() {

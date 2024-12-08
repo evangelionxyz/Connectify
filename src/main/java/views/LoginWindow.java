@@ -50,30 +50,39 @@ public class LoginWindow extends WindowBase {
 
             if (ImGui.begin("Login Window", show, flags)) {
 
+                final float windowWidth = ImGui.getWindowSize().x;
+                final float textWidth = ImGui.calcTextSize("Login / Register Page").x;
+                ImGui.setCursorPosX(windowWidth / 2.0f - textWidth / 2.0f);
                 ImGui.text("Login / Register Page");
 
                 ImGui.beginChild("##login_form", new ImVec2(0.0f, availableHeight), true);
+
+                final float itemWidth = windowWidth / 3.0f;
+                ImGui.pushItemWidth(itemWidth);
+
+                ImGui.setCursorPosX(windowWidth / 2.0f - itemWidth / 2.0f);
                 if (ImGui.combo(currentLoginType, imIntIndex, loginTypes)) {
                     loginTypeIndex = imIntIndex.get();
                     currentLoginType = loginTypes[loginTypeIndex];
                 }
 
+                ImGui.setCursorPosX(windowWidth / 2.0f - itemWidth / 2.0f);
                 ImGui.inputText("Display Name", nameInput);
+                ImGui.setCursorPosX(windowWidth / 2.0f - itemWidth / 2.0f);
                 ImGui.inputText("Username", usernameInput);
+                ImGui.setCursorPosX(windowWidth / 2.0f - itemWidth / 2.0f);
                 ImGui.inputText("Password", passwordInput, ImGuiInputTextFlags.Password);
-
                 // mahasiswa only
-                if (loginTypeIndex == 0) {
-                    ImGui.inputText("University", companyInput);
-                }
-                else if (loginTypeIndex == 1) {
-                    ImGui.inputText("Company", companyInput);
-                }
 
+                ImGui.setCursorPosX(windowWidth / 2.0f - itemWidth / 2.0f);
+                if (loginTypeIndex == 0) ImGui.inputText("University", companyInput);
+                else if (loginTypeIndex == 1) ImGui.inputText("Company", companyInput);
                 if (showErrorMessage) {
+                    ImGui.setCursorPosX(windowWidth / 2.0f - itemWidth / 2.0f);
                     showErrorMessage();
                 }
 
+                ImGui.popItemWidth();
                 ImGui.endChild();
 
                 ImGui.beginChild("##login_buttons", new ImVec2(0.0f, 0.0f), true);
@@ -105,6 +114,7 @@ public class LoginWindow extends WindowBase {
                     }
                 };
 
+                ImGui.setCursorPosX(windowWidth / 2.0f - 210.0f);
                 if (ImGui.button("Login", new ImVec2(200.0f, buttonHeight))) {
                     loginUser.run();
                 }
@@ -139,6 +149,7 @@ public class LoginWindow extends WindowBase {
                     }
                 };
 
+                ImGui.setCursorPosX(windowWidth / 2.0f + 10.0f);
                 if (ImGui.button("Register", new ImVec2(200.0f, buttonHeight))) {
                     registerUser.run();
                 }

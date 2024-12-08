@@ -12,10 +12,9 @@ import models.Chat;
 import models.Community;
 
 public class CommunityWindow extends WindowBase {
-
-    private ImBoolean imCreateWin = new ImBoolean(false);
-    private ImString nameInput = new ImString(256);
-    private ImString userChatInput = new ImString(256);
+    private final ImBoolean imCreateWin = new ImBoolean(false);
+    private final ImString nameInput = new ImString(256);
+    private final ImString userChatInput = new ImString(256);
 
     private Community communityContextOpen = null;
 
@@ -147,7 +146,6 @@ public class CommunityWindow extends WindowBase {
             ImGui.endChild();
         }
         ImGui.endChild();
-
         ImGui.end();
     }
 

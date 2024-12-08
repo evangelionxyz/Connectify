@@ -6,6 +6,7 @@ public class Event extends ModelBase {
     private String title;
     private List<Mahasiswa> mahasiswa;
     private List<Quest> quests;
+    private String description;
 
     private final Community owner;
 
@@ -13,6 +14,14 @@ public class Event extends ModelBase {
         super();
         this.title = title;
         this.owner = owner;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
     public void setTitle(String title) {
