@@ -108,7 +108,7 @@ public class LoginWindow extends WindowBase {
                             errorMessage = "Password could not be empty";
                         } else if (usernameInput.isEmpty() && passwordInput.isEmpty()) {
                             errorMessage = "Username and password could not be empty";
-                        } else {
+                        }else {
                             errorMessage = "Your username or password is incorrect";
                         }
                     }
@@ -134,12 +134,17 @@ public class LoginWindow extends WindowBase {
                     }
 
                     if (AppManager.currentUser != null) {
-                        if (AppManager.registerUser(AppManager.currentUser)) {
-                            nameInput.clear();
-                            passwordInput.clear();
-                            companyInput.clear();
-                            usernameInput.clear();
-                            this.close();
+                        if (AppManager.getUserByUsername(usernameInput.get()) == null) {
+                            if (AppManager.registerUser(AppManager.currentUser)) {
+                                nameInput.clear();
+                                passwordInput.clear();
+                                companyInput.clear();
+                                usernameInput.clear();
+                                this.close();
+                            }
+                        } else {
+                            showErrorMessage = true;
+                            errorMessage = "Username is already taken";
                         }
                     } else {
                         showErrorMessage = true;

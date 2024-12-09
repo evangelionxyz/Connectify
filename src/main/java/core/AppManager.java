@@ -21,7 +21,21 @@ public class AppManager {
 
     public static User currentUser = null;
     public static Community selectedCommunity = null;
+    public static Event selectedEvent = null;
     public static List<Community> communities = new ArrayList<>();
+    public static List<Event> events = new ArrayList<>();
+
+    public static void initializeFirebase() throws IOException {
+        FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");
+        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredentials(credentials).build();
+        firebaseApp = FirebaseApp.initializeApp(options);
+        firestore = FirestoreClient.getFirestore(firebaseApp);
+
+        // initialize communities
+        communityStartListening();
+    }
 
     public static boolean registerUser(User user) {
         try {
@@ -74,6 +88,26 @@ public class AppManager {
         }
     }
 
+    public static User getUserByUsername(String username) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("users", "username", username);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+
+            String displayName = doc.getString("displayname");
+            String type = doc.getString("type");
+            String company = doc.getString("company");
+            String encryptedPassword = doc.getString("password");
+            String userId = doc.getString("id");
+            assert encryptedPassword != null;
+            String password = EncryptionUtils.decrypt(encryptedPassword, EncryptionUtils.getGlobalSecretKey());
+            User user = new User(displayName, username, type, company, password);
+            user.setId(userId);
+            return user;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static User getUserById(String userId) {
         try {
             QuerySnapshot q = getQueryByFieldValue("users", "id", userId);
@@ -89,7 +123,7 @@ public class AppManager {
             user.setId(userId);
             return user;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
@@ -141,18 +175,46 @@ public class AppManager {
         }
     }
 
-    public static void initializeFirebase() throws IOException {
-        FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");
-        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-        FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredentials(credentials).build();
-        firebaseApp = FirebaseApp.initializeApp(options);
-        firestore = FirestoreClient.getFirestore(firebaseApp);
+    /// ------------------------------------
+    /// Event section
+    /// ------------------------------------
 
-        // initialize communities
-        communityStartListening();
+    public static void storeEventToDatabase(Event event) {
+        try {
+            Map<String, Object> comData = event.getStringObjectMap();
+            DocumentReference docRef = firestore.collection("events").document(event.getId());
+            ApiFuture<WriteResult> result = docRef.set(comData);
+            WriteResult writeResult = result.get();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to create event");
+            throw new RuntimeException();
+        }
     }
 
+    public static void removeEventFromDatabase(Event event) {
+        try {
+            DocumentReference docRef = firestore.collection("events").document(event.getId());
+            ApiFuture<WriteResult> result = docRef.delete();
+            WriteResult writeResult = result.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Event getEventById(String eventId) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("events", "id", eventId);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+
+            String title = doc.getString("title");
+
+            Event event = new Event(title);
+            event.setId(eventId);
+            return event;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /// ------------------------------------
     /// Communities section
@@ -194,7 +256,7 @@ public class AppManager {
         });
     }
 
-    public static void createCommunityToDatabase(Community community) {
+    public static void storeCommunityToDatabase(Community community) {
         try {
             Map<String, Object> comData = community.getStringObjectMap();
             DocumentReference docRef = firestore.collection("communities").document(community.getId());

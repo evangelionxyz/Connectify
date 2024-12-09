@@ -12,7 +12,7 @@ public class EventTest {
         Mahasiswa pemilik = new Mahasiswa("evan", "evan", "telu");
         Community community = new Community("Offsider", pemilik);
 
-        Event hackathon = new Event(community, "Hackathon 2024");
+        Event hackathon = new Event("Hackathon 2024");
 
         Mahasiswa syahdan = new Mahasiswa("syahdan", "syahdan", "telu");
         Mahasiswa yudha = new Mahasiswa("yuda", "yuda", "telu");
@@ -31,7 +31,7 @@ public class EventTest {
         hackathon.addQuest(quest4);
 
         System.out.println("Mahasiswa yang terdaftar pada event:");
-        for (Mahasiswa m : hackathon.getMahasiswa()) {
+        for (String m : hackathon.getMahasiswaIDs()) {
             System.out.println("- " + m);
         }
 
@@ -60,8 +60,8 @@ public class EventTest {
         }
 
         System.out.println("Quest yang Wajib dikerjakan:");
-        for (Quest quest : hackathon.getQuests()) {
-            System.out.println(quest.getTitle());
+        for (String questId : hackathon.getQuestIDs()) {
+            System.out.println(questId);
         }
     }
 
