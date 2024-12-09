@@ -37,6 +37,55 @@ public class AppManager {
         communityStartListening();
     }
 
+    // TEST
+    // ===========================
+    public static boolean registerUserTest(User user) {
+        try {
+            Map<String, Object> userData = user.getStringObjectMap();
+            // get collection's document user -> document by id
+            DocumentReference docRef = firestore.collection("users-test").document(user.getId());
+            // write to firestore
+            ApiFuture<WriteResult> result = docRef.set(userData);
+            // wait for write
+            WriteResult writeResult = result.get();
+            return true;
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to register user to firestore: "+e.getMessage());
+            throw new RuntimeException();
+        }
+    }
+
+    public static User loginUserTest(String username, String password) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("users-test", "username", username);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+            // retrieve encrypted password from Firestore
+            String encryptedPasswordStored = doc.getString("password");
+            // encrypt the input password for comparison
+            String encryptedPasswordInput = EncryptionUtils.encrypt(password, EncryptionUtils.getGlobalSecretKey());
+            assert encryptedPasswordStored != null;
+            if (encryptedPasswordStored.equals(encryptedPasswordInput)) {
+                String id = doc.getString("id");
+                String displayName = doc.getString("displayname");
+                String type = doc.getString("type");
+                String company = doc.getString("company");
+                User loggedInUser = new User(displayName, username, type, company, password);
+                loggedInUser.setId(id);
+                return loggedInUser;
+            }
+            System.err.println("[ERROR] No matching user found or incorect password.");
+            return null;
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to login user from firestore: "+e.getMessage());
+            return null;
+        }
+    }
+
+
+
+    // ===========================
+    // !TEST
+
     public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = user.getStringObjectMap();
