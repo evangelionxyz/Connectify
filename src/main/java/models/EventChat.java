@@ -15,10 +15,6 @@ public class EventChat extends Chat {
         super.type = "event";
     }
 
-    public void setEvent(Community community, String title) {
-        event = new Event(community, title);
-    }
-
     public void setEvent(Event event) {
         this.event = event;
     }

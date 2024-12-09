@@ -1,22 +1,38 @@
 package models;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Event extends ModelBase {
     private String title;
-    private List<Mahasiswa> mahasiswa;
-    private List<Quest> quests;
+    private List<String> mahasiswaIds;
+    private List<String> questsIds;
     private String description;
+    private String creatorId;
+    private Community owner;
 
-    private final Community owner;
-
-    public Event(Community owner, String title) {
+    public Event(String title) {
         super();
         this.title = title;
+        this.owner = null;
+        this.mahasiswaIds = new ArrayList<>();
+        this.questsIds = new ArrayList<>();
+    }
+
+    public void setOwner(Community owner) {
         this.owner = owner;
-        this.mahasiswa = new ArrayList<>();
-        this.quests = new ArrayList<>();
+    }
+
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public final String getCreatorId() {
+        return creatorId;
     }
 
     public void setDescription(String description) {
@@ -32,31 +48,35 @@ public class Event extends ModelBase {
     }
 
     public void addMahasiswa(Mahasiswa mhs) {
-        mahasiswa.add(mhs);
+        mahasiswaIds.add(mhs.getId());
     }
 
     public void addQuest(Quest quest) {
-        quests.add(quest);
+        questsIds.add(quest.getId());
     }
     
-    public List<Quest> getQuests() {
-        return quests;
+    public List<String> getQuestIDs() {
+        return questsIds;
     }
 
-    public Mahasiswa findMahasiswa(String username) {
-        for (Mahasiswa mhs : mahasiswa) {
-            if (mhs.username.equals(username)) {
-                return mhs;
-            }
-        }
-        return null;
-    }
-
-    public final List<Mahasiswa> getMahasiswa() {
-        return mahasiswa;
+    public List<String> getMahasiswaIDs() {
+        return mahasiswaIds;
     }
 
     public final String getTitle() {
         return title;
+    }
+
+    @NotNull
+    public Map<String, Object> getStringObjectMap() {
+        Map<String, Object> stringObj = new HashMap<>();
+        stringObj.put("id", id);
+        stringObj.put("title", title);
+        stringObj.put("description", description);
+        stringObj.put("mahasiswaIds", mahasiswaIds);
+        stringObj.put("questsIds", questsIds);
+        stringObj.put("creatorId", creatorId);
+        stringObj.put("ownerId", owner != null ? owner.getId() : null);
+        return stringObj;
     }
 }

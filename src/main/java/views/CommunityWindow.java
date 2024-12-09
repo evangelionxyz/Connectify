@@ -25,7 +25,7 @@ public class CommunityWindow extends WindowBase {
         Runnable create = () -> {
             if (nameInput.isNotEmpty()) {
                 Community com = new Community(nameInput.get(), AppManager.currentUser);
-                AppManager.createCommunityToDatabase(com);
+                AppManager.storeCommunityToDatabase(com);
             }
         };
 
@@ -97,8 +97,9 @@ public class CommunityWindow extends WindowBase {
                 }
                 ImGui.popStyleVar(1);
                 ImGui.popStyleColor(1);
-                if (selected)
+                if (selected) {
                     ImGui.popStyleColor(1);
+                }
             }
 
             ImGui.endChild(); // community_list
