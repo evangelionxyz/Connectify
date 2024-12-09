@@ -88,6 +88,26 @@ public class AppManager {
         }
     }
 
+    public static User getUserByUsername(String username) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("users", "username", username);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+
+            String displayName = doc.getString("displayname");
+            String type = doc.getString("type");
+            String company = doc.getString("company");
+            String encryptedPassword = doc.getString("password");
+            String userId = doc.getString("id");
+            assert encryptedPassword != null;
+            String password = EncryptionUtils.decrypt(encryptedPassword, EncryptionUtils.getGlobalSecretKey());
+            User user = new User(displayName, username, type, company, password);
+            user.setId(userId);
+            return user;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static User getUserById(String userId) {
         try {
             QuerySnapshot q = getQueryByFieldValue("users", "id", userId);
@@ -103,7 +123,7 @@ public class AppManager {
             user.setId(userId);
             return user;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return null;
         }
     }
 

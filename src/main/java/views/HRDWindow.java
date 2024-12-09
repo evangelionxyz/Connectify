@@ -7,16 +7,13 @@ import imgui.flag.*;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import models.Community;
 import models.Event;
-import models.HRD;
 
 public class HRDWindow extends WindowBase {
     private final ImBoolean imCreateWin = new ImBoolean(false);
     private final ImString eventTitle = new ImString(128);
     private final ImString eventDesc = new ImString(256);
     private Event eventContextOpen = null;
-    private boolean isStoredToDatabase = false;
 
     @Override
     public void init() {
@@ -84,7 +81,6 @@ public class HRDWindow extends WindowBase {
 
                 if (ImGui.isItemHovered() && ImGui.isItemClicked(ImGuiMouseButton.Right)) {
                     if (ev.getCreatorId().equals(AppManager.currentUser.getId())) {
-                        // TODO: Context manager
                         ImGui.openPopup("##event_context_menu", ImGuiPopupFlags.AnyPopupLevel);
                         eventContextOpen = ev;
                     }

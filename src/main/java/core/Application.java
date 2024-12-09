@@ -44,7 +44,6 @@ public class Application {
         }
 
         ImGui.sameLine();
-
         ImGui.end();
     }
 
@@ -80,8 +79,8 @@ public class Application {
         window.setGuiRenderFunction(()-> {
             loginWindow.render();
 
+            toolBar();
             if (AppManager.currentUser != null) {
-                toolBar();
                 communityWindow.render();
                 if (AppManager.currentUser.isHRD()) {
                     hrdWindow.render();
