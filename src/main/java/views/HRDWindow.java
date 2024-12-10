@@ -17,7 +17,6 @@ public class HRDWindow extends WindowBase {
 
     @Override
     public void init() {
-        AppManager.selectedEvent = new Event("Event");
     }
 
     private void createWindow() {
@@ -55,16 +54,16 @@ public class HRDWindow extends WindowBase {
         }
 
         ImGui.begin("Event Manager");
-
         ImGui.beginChild("##events", new ImVec2(210.0f, 0.0f), true);
 
         final float buttonHeight = 25.0f;
-        float availableHeight = imgui.ImGui.getContentRegionAvailY() - buttonHeight - 20;
+        float availableHeight = imgui.ImGui.getContentRegionAvailY() - buttonHeight - 10;
 
         {
             ImGui.beginChild("##event_list", new ImVec2(0.0f, availableHeight), true);
             for (Event ev: AppManager.events) {
-                boolean selected = AppManager.selectedEvent.getId().equals(ev.getId());
+                boolean selected = AppManager.selectedEvent != null && AppManager.selectedEvent.getId().equals(ev.getId());
+
                 int treeFlags = (selected ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.None) | ImGuiTreeNodeFlags.Leaf
                     | ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.SpanFullWidth;
 
@@ -77,6 +76,8 @@ public class HRDWindow extends WindowBase {
 
                 if (ImGui.isItemClicked(ImGuiMouseButton.Left)) {
                     AppManager.selectedEvent = ev;
+                    eventTitle.set(ev.getTitle());
+                    eventDesc.set(ev.getDescription());
                 }
 
                 if (ImGui.isItemHovered() && ImGui.isItemClicked(ImGuiMouseButton.Right)) {
@@ -89,7 +90,7 @@ public class HRDWindow extends WindowBase {
                 if (eventContextOpen != null) {
                     if (ImGui.beginPopup("##event_context_menu")) {
                         if (ImGui.menuItem("Delete")) {
-                            AppManager.removeEventFromDatabase(eventContextOpen);
+                            AppManager.removeDocument("events", eventContextOpen.getId());
                         }
                         ImGui.endPopup();
                     }
@@ -105,31 +106,46 @@ public class HRDWindow extends WindowBase {
                     ImGui.popStyleColor(1);
                 }
             }
-            imgui.ImGui.beginChild("##community_list_action_bar", new ImVec2(0.0f, buttonHeight), true);
-            if (imgui.ImGui.button("Create Community")) {
+
+            ImGui.endChild(); // event_list
+        }
+
+        if (imgui.ImGui.beginChild("##event_list_action_bar", new ImVec2(0.0f, availableHeight), true)) {
+            if (imgui.ImGui.button("Create Event")) {
                 imCreateWin.set(true);
             }
-            imgui.ImGui.endChild(); // community_list_action_bar
-            ImGui.endChild(); // event_list
+            imgui.ImGui.endChild(); // event_list_action_bar
+        }
 
-            ImGui.sameLine();
-            ImGui.beginChild("##event_content", new ImVec2(0.0f, availableHeight), true);
-            ImGui.inputText("Title", eventTitle);
-            ImGui.inputTextMultiline("Description", eventDesc);
+        ImGui.endChild(); // !event
+
+        ImGui.sameLine();
+
+        // right column
+        ImGui.beginChild("##event_content", new ImVec2(0.0f, availableHeight), true);
+
+        if (AppManager.selectedEvent != null) {
+            if (ImGui.inputText("Title", eventTitle)) {
+                AppManager.selectedEvent.setTitle(eventTitle.get());
+            }
+
+            if (ImGui.inputTextMultiline("Description", eventDesc)) {
+                AppManager.selectedEvent.setDescription(eventDesc.get());
+            }
 
             Runnable editEvent = () -> {
                 if (eventTitle.isNotEmpty() && eventDesc.isNotEmpty()) {
-                    AppManager.selectedEvent.setCreatorId(AppManager.currentUser.getId());
+                    AppManager.updateEvent(AppManager.selectedEvent);
                 }
             };
+
             if (ImGui.button("Edit")) {
                 editEvent.run();
             }
-
-            ImGui.endChild(); // event_content
         }
 
-        ImGui.endChild();
+        ImGui.endChild(); // event_content
+
         ImGui.end();
     }
 }

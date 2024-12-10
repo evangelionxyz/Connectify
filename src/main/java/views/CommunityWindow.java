@@ -8,8 +8,7 @@ import imgui.ImVec4;
 import imgui.flag.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import models.Chat;
-import models.Community;
+import models.*;
 
 public class CommunityWindow extends WindowBase {
     private final ImBoolean imCreateWin = new ImBoolean(false);
@@ -86,7 +85,7 @@ public class CommunityWindow extends WindowBase {
                 if (communityContextOpen != null) {
                     if (ImGui.beginPopup("##community_context_menu")) {
                         if (ImGui.menuItem("Delete")) {
-                            AppManager.removeCommunityFromDatabase(communityContextOpen);
+                            AppManager.removeDocument("communities", communityContextOpen.getId());
                         }
                         ImGui.endPopup();
                     }
@@ -137,13 +136,18 @@ public class CommunityWindow extends WindowBase {
                     userChatInput.clear();
                 }
             };
-            if (ImGui.inputText("##chat", userChatInput, ImGuiInputTextFlags.EnterReturnsTrue)) {
-                sendMessage.run();
-            }
+
+            ImGui.inputText("##chat", userChatInput);
+
             ImGui.sameLine();
             if (ImGui.button("Send", new ImVec2(200.0f, ImGui.getContentRegionAvail().y))) {
                 sendMessage.run();
             }
+
+            if (ImGui.isKeyPressed(ImGuiKey.Enter)) {
+                sendMessage.run();
+            }
+
             ImGui.endChild();
         }
         ImGui.endChild();
@@ -152,7 +156,27 @@ public class CommunityWindow extends WindowBase {
 
     private void displayChat(Chat c) {
         ImGui.text(c.getSender().getUsername());
-        ImGui.text(c.getMessage());
+        if (c.getType().equals("default")) {
+            ImGui.text(c.getMessage());
+        } else if (c.getType().equals("event")) {
+            EventChat ec = (EventChat) c;
+            if (ec.getEvent() != null) {
+                ImGui.text("Attachment");
+                Event ev = ec.getEvent();
+
+                ImGui.text(ev.getTitle());
+
+                if (AppManager.currentUser instanceof Mahasiswa) {
+                    if (ImGui.button("Apply")) {
+                        System.out.println("here here bandage");
+                    }
+                }
+            }
+
+        }
+
+        ImGui.text(c.getTimestamp().toString());
+
         ImGui.separator();
     }
 }

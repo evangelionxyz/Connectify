@@ -13,18 +13,17 @@ public class Event extends ModelBase {
     private List<String> questsIds;
     private String description;
     private String creatorId;
-    private Community owner;
+    private String communityId;
 
     public Event(String title) {
         super();
         this.title = title;
-        this.owner = null;
         this.mahasiswaIds = new ArrayList<>();
         this.questsIds = new ArrayList<>();
     }
 
-    public void setOwner(Community owner) {
-        this.owner = owner;
+    public void setCommunityId(String communityId) {
+        this.communityId = communityId;
     }
 
     public void setCreatorId(String creatorId) {
@@ -54,7 +53,15 @@ public class Event extends ModelBase {
     public void addQuest(Quest quest) {
         questsIds.add(quest.getId());
     }
-    
+
+    public void setMahasiswaIds(List<String> mahasiswaIds) {
+        this.mahasiswaIds = mahasiswaIds;
+    }
+
+    public void setQuestsIds(List<String> questsIds) {
+        this.questsIds = questsIds;
+    }
+
     public List<String> getQuestIDs() {
         return questsIds;
     }
@@ -76,7 +83,7 @@ public class Event extends ModelBase {
         stringObj.put("mahasiswaIds", mahasiswaIds);
         stringObj.put("questsIds", questsIds);
         stringObj.put("creatorId", creatorId);
-        stringObj.put("ownerId", owner != null ? owner.getId() : null);
+        stringObj.put("communityId", communityId);
         return stringObj;
     }
 }

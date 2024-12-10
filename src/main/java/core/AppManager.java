@@ -33,8 +33,19 @@ public class AppManager {
         firebaseApp = FirebaseApp.initializeApp(options);
         firestore = FirestoreClient.getFirestore(firebaseApp);
 
-        // initialize communities
+        // initialize
         communityStartListening();
+        eventStartListening();
+    }
+
+    public static void removeDocument(String path, String id) {
+        try {
+            DocumentReference docRef = firestore.collection(path).document(id);
+            ApiFuture<WriteResult> result = docRef.delete();
+            WriteResult writeResult = result.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // TEST
@@ -89,6 +100,7 @@ public class AppManager {
     public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = user.getStringObjectMap();
+
             // get collection's document user -> document by id
             DocumentReference docRef = firestore.collection("users").document(user.getId());
             // write to firestore
@@ -206,6 +218,62 @@ public class AppManager {
         }
     }
 
+    public static void updateEvent(Event event) {
+        try {
+            CollectionReference ref = firestore.collection("events");
+            DocumentReference docRef = ref.document(event.getId());
+
+            docRef.update("title", event.getTitle());
+            docRef.update("description", event.getDescription());
+
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to update event: "+e.getMessage());
+        }
+    }
+
+    /// ------------------------------------
+    /// Event section
+    /// ------------------------------------
+
+    private static void eventStartListening() {
+        firestore.collection("events").addSnapshotListener((snapshot, error) -> {
+            if (error != null) {
+                System.err.println("[ERROR]  Listening failed: "+error);
+                return;
+            }
+
+            if (snapshot != null) {
+                for (DocumentChange change : snapshot.getDocumentChanges()) {
+                    String docId = change.getDocument().getId();
+                    // find if the document ID matches a local community
+                    Event localEvent = events.stream()
+                            .filter(c -> c.getId().equals(docId))
+                            .findFirst()
+                            .orElse(null);
+
+                    // handle based on the type of change
+                    switch (change.getType()) {
+                        case ADDED -> {
+                            Event event = eventCreateFromDocument(change.getDocument());
+                            events.add(event);
+                        }
+                        case MODIFIED -> {
+                            if (localEvent != null) {
+                                eventUpdateLocal(localEvent, change.getDocument());
+                            }
+                        }
+                        case REMOVED -> {
+                            if (localEvent != null) {
+                                events.remove(localEvent);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     public static void addChatToCommunity(Community community, Chat chat) {
         try {
             storeChatToDatabase(chat);
@@ -220,13 +288,37 @@ public class AppManager {
 
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to add chat to community");
-            throw new RuntimeException(e);
         }
     }
 
-    /// ------------------------------------
-    /// Event section
-    /// ------------------------------------
+    private static Event eventCreateFromDocument(DocumentSnapshot doc) {
+        String creatorId = doc.getString("creatorId");
+        String description = doc.getString("description");
+        String id = doc.getString("id");
+        String title = doc.getString("title");
+
+        Event ev = new Event(title);
+        ev.setCreatorId(creatorId);
+        ev.setDescription(description);
+        ev.setId(id);
+        ev.setCommunityId(doc.getString("communityId"));
+        // load mahasiswa ids
+        ArrayList<String> mhsIDs = (ArrayList<String>)doc.get("mahasiswaIds");
+        ArrayList<String> questIDs = (ArrayList<String>)doc.get("questsIds");
+
+        assert mhsIDs != null;
+        ev.setMahasiswaIds(mhsIDs);
+
+        assert questIDs != null;
+        ev.setQuestsIds(questIDs);
+
+        return ev;
+    }
+
+    private static void eventUpdateLocal(Event event, DocumentSnapshot doc) {
+        event.setTitle(doc.getString("title"));
+        event.setDescription(doc.getString("description"));
+    }
 
     public static void storeEventToDatabase(Event event) {
         try {
@@ -240,23 +332,11 @@ public class AppManager {
         }
     }
 
-    public static void removeEventFromDatabase(Event event) {
-        try {
-            DocumentReference docRef = firestore.collection("events").document(event.getId());
-            ApiFuture<WriteResult> result = docRef.delete();
-            WriteResult writeResult = result.get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static Event getEventById(String eventId) {
         try {
             QuerySnapshot q = getQueryByFieldValue("events", "id", eventId);
             QueryDocumentSnapshot doc = q.getDocuments().getFirst();
-
             String title = doc.getString("title");
-
             Event event = new Event(title);
             event.setId(eventId);
             return event;
@@ -314,16 +394,6 @@ public class AppManager {
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to create community");
             throw new RuntimeException();
-        }
-    }
-
-    public static void removeCommunityFromDatabase(Community community) {
-        try {
-            DocumentReference docRef = firestore.collection("communities").document(community.getId());
-            ApiFuture<WriteResult> result = docRef.delete();
-            WriteResult writeResult = result.get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
