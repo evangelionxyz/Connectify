@@ -96,7 +96,6 @@ public class AppManager {
 
     // ===========================
     // !TEST
-
     public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = user.getStringObjectMap();
@@ -127,6 +126,7 @@ public class AppManager {
         try {
             QuerySnapshot q = getQueryByFieldValue("users", "username", username);
             QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+
             // retrieve encrypted password from Firestore
             String encryptedPasswordStored = doc.getString("password");
             // encrypt the input password for comparison
@@ -141,7 +141,7 @@ public class AppManager {
                 loggedInUser.setId(id);
                 return loggedInUser;
             }
-            System.err.println("[ERROR] No matching user found or incorect password.");
+            System.err.println("[ERROR] No matching user found or incorrect password.");
             return null;
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to login user from firestore: "+e.getMessage());
@@ -301,10 +301,14 @@ public class AppManager {
         ev.setCreatorId(creatorId);
         ev.setDescription(description);
         ev.setId(id);
-        ev.setCommunityId(doc.getString("communityId"));
-        // load mahasiswa ids
+
+        // load ids
         ArrayList<String> mhsIDs = (ArrayList<String>)doc.get("mahasiswaIds");
         ArrayList<String> questIDs = (ArrayList<String>)doc.get("questsIds");
+        ArrayList<String> communityIDs = (ArrayList<String>)doc.get("communitiesIds");
+
+        assert communityIDs != null;
+        ev.setCommunityIds(communityIDs);
 
         assert mhsIDs != null;
         ev.setMahasiswaIds(mhsIDs);

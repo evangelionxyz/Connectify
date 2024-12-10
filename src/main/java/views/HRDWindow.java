@@ -33,17 +33,15 @@ public class HRDWindow extends WindowBase {
             }
         };
 
-        if (imgui.ImGui.button("Create")) {
+        if (ImGui.button("Create")) {
             create.run();
             imCreateWin.set(false);
         }
-        imgui.ImGui.sameLine();
-
-        if (imgui.ImGui.button("Cancel")) {
+        ImGui.sameLine();
+        if (ImGui.button("Cancel")) {
             imCreateWin.set(false);
         }
-
-        imgui.ImGui.end();
+        ImGui.end();
     }
 
     @Override
@@ -54,98 +52,103 @@ public class HRDWindow extends WindowBase {
         }
 
         ImGui.begin("Event Manager");
-        ImGui.beginChild("##events", new ImVec2(210.0f, 0.0f), true);
 
         final float buttonHeight = 25.0f;
         float availableHeight = imgui.ImGui.getContentRegionAvailY() - buttonHeight - 10;
 
+        // LEFT SECTION
+        ImGui.beginChild("##events", new ImVec2(210.0f, 0.0f), true);
         {
             ImGui.beginChild("##event_list", new ImVec2(0.0f, availableHeight), true);
-            for (Event ev: AppManager.events) {
-                boolean selected = AppManager.selectedEvent != null && AppManager.selectedEvent.getId().equals(ev.getId());
+            {
+                for (Event ev : AppManager.events) {
+                    boolean selected = AppManager.selectedEvent != null && AppManager.selectedEvent.getId().equals(ev.getId());
 
-                int treeFlags = (selected ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.None) | ImGuiTreeNodeFlags.Leaf
-                    | ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.SpanFullWidth;
+                    int treeFlags = (selected ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.None) | ImGuiTreeNodeFlags.Leaf
+                            | ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.SpanFullWidth;
 
-                if (selected) imgui.ImGui.pushStyleColor(ImGuiCol.Header, new ImVec4(0.123f, 0.123f, 0.7633f, 1.0f));
-                imgui.ImGui.pushStyleColor(ImGuiCol.HeaderHovered, new ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-                imgui.ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, new ImVec2(10.0f, 10.0f));
+                    if (selected)
+                        imgui.ImGui.pushStyleColor(ImGuiCol.Header, new ImVec4(0.123f, 0.123f, 0.7633f, 1.0f));
+                    imgui.ImGui.pushStyleColor(ImGuiCol.HeaderHovered, new ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
+                    imgui.ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, new ImVec2(10.0f, 10.0f));
 
-                // id, flags, label
-                boolean opened = imgui.ImGui.treeNodeEx(ev.getId(), treeFlags, ev.getTitle());
+                    boolean opened = imgui.ImGui.treeNodeEx(ev.getId(), treeFlags, ev.getTitle());
 
-                if (ImGui.isItemClicked(ImGuiMouseButton.Left)) {
-                    AppManager.selectedEvent = ev;
-                    eventTitle.set(ev.getTitle());
-                    eventDesc.set(ev.getDescription());
-                }
-
-                if (ImGui.isItemHovered() && ImGui.isItemClicked(ImGuiMouseButton.Right)) {
-                    if (ev.getCreatorId().equals(AppManager.currentUser.getId())) {
-                        ImGui.openPopup("##event_context_menu", ImGuiPopupFlags.AnyPopupLevel);
-                        eventContextOpen = ev;
+                    if (ImGui.isItemClicked(ImGuiMouseButton.Left)) {
+                        AppManager.selectedEvent = ev;
+                        eventTitle.set(ev.getTitle());
+                        eventDesc.set(ev.getDescription());
                     }
-                }
 
-                if (eventContextOpen != null) {
-                    if (ImGui.beginPopup("##event_context_menu")) {
-                        if (ImGui.menuItem("Delete")) {
-                            AppManager.removeDocument("events", eventContextOpen.getId());
+                    if (ImGui.isItemHovered() && ImGui.isItemClicked(ImGuiMouseButton.Right)) {
+                        if (ev.getCreatorId().equals(AppManager.currentUser.getId())) {
+                            ImGui.openPopup("##event_context_menu", ImGuiPopupFlags.AnyPopupLevel);
+                            eventContextOpen = ev;
                         }
-                        ImGui.endPopup();
+                    }
+
+                    if (eventContextOpen != null) {
+                        if (ImGui.beginPopup("##event_context_menu")) {
+                            if (ImGui.menuItem("Delete")) {
+                                AppManager.removeDocument("events", eventContextOpen.getId());
+                                eventContextOpen = null;
+                                AppManager.selectedEvent = null;
+                            }
+                            ImGui.endPopup();
+                        }
+                    }
+
+                    if (opened) {
+                        ImGui.treePop();
+                    }
+
+                    ImGui.popStyleVar(1);
+                    ImGui.popStyleColor(1);
+                    if (selected) {
+                        ImGui.popStyleColor(1);
                     }
                 }
+            }
+            ImGui.endChild(); // !event_list
 
-                if (opened) {
-                    ImGui.treePop();
-                }
 
-                ImGui.popStyleVar(1);
-                ImGui.popStyleColor(1);
-                if (selected) {
-                    ImGui.popStyleColor(1);
+            ImGui.beginChild("##event_list_action_bar", new ImVec2(0.0f, 0.0f), true);
+            {
+                if (imgui.ImGui.button("Create Event")) {
+                    imCreateWin.set(true);
                 }
             }
-
-            ImGui.endChild(); // event_list
+            ImGui.endChild(); // !event_list_action_bar
         }
 
-        if (imgui.ImGui.beginChild("##event_list_action_bar", new ImVec2(0.0f, availableHeight), true)) {
-            if (imgui.ImGui.button("Create Event")) {
-                imCreateWin.set(true);
-            }
-            imgui.ImGui.endChild(); // event_list_action_bar
-        }
+        ImGui.endChild(); // !events
 
-        ImGui.endChild(); // !event
 
         ImGui.sameLine();
-
-        // right column
+        // RIGHT SECTION
         ImGui.beginChild("##event_content", new ImVec2(0.0f, availableHeight), true);
-
-        if (AppManager.selectedEvent != null) {
-            if (ImGui.inputText("Title", eventTitle)) {
-                AppManager.selectedEvent.setTitle(eventTitle.get());
-            }
-
-            if (ImGui.inputTextMultiline("Description", eventDesc)) {
-                AppManager.selectedEvent.setDescription(eventDesc.get());
-            }
-
-            Runnable editEvent = () -> {
-                if (eventTitle.isNotEmpty() && eventDesc.isNotEmpty()) {
-                    AppManager.updateEvent(AppManager.selectedEvent);
+        {
+            if (AppManager.selectedEvent != null) {
+                ImGui.text(AppManager.selectedEvent.getTitle());
+                ImGui.separator();
+                if (ImGui.inputText("Title", eventTitle)) {
+                    AppManager.selectedEvent.setTitle(eventTitle.get());
                 }
-            };
-
-            if (ImGui.button("Edit")) {
-                editEvent.run();
+                if (ImGui.inputTextMultiline("Description", eventDesc)) {
+                    AppManager.selectedEvent.setDescription(eventDesc.get());
+                }
+                Runnable editEvent = () -> {
+                    if (eventTitle.isNotEmpty() && eventDesc.isNotEmpty()) {
+                        AppManager.updateEvent(AppManager.selectedEvent);
+                    }
+                };
+                if (ImGui.button("Save", new ImVec2(150.0f, buttonHeight))) {
+                    editEvent.run();
+                }
             }
         }
+        ImGui.endChild(); // !event_content
 
-        ImGui.endChild(); // event_content
-
-        ImGui.end();
+        ImGui.end(); // !event manager
     }
 }

@@ -13,17 +13,22 @@ public class Event extends ModelBase {
     private List<String> questsIds;
     private String description;
     private String creatorId;
-    private String communityId;
+    private List<String> communityIds;
 
     public Event(String title) {
         super();
         this.title = title;
         this.mahasiswaIds = new ArrayList<>();
         this.questsIds = new ArrayList<>();
+        this.communityIds = new ArrayList<>();
     }
 
-    public void setCommunityId(String communityId) {
-        this.communityId = communityId;
+    public void addCommunityId(String communityId) {
+        this.communityIds.add(communityId);
+    }
+
+    public void setCommunityIds(List<String> communityIds) {
+        this.communityIds = communityIds;
     }
 
     public void setCreatorId(String creatorId) {
@@ -83,7 +88,7 @@ public class Event extends ModelBase {
         stringObj.put("mahasiswaIds", mahasiswaIds);
         stringObj.put("questsIds", questsIds);
         stringObj.put("creatorId", creatorId);
-        stringObj.put("communityId", communityId);
+        stringObj.put("communityIds", communityIds);
         return stringObj;
     }
 }
