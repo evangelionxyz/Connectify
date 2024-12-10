@@ -23,8 +23,7 @@ public class UnitTest {
         while (true) {
             int option = menu();
 
-            switch (option)
-            {
+            switch (option) {
                 case 1 -> {
                     System.out.println("Selamat datang di menu registrasi");
                     System.out.print("Masukkan nama: ");
@@ -59,9 +58,33 @@ public class UnitTest {
 
                     if (AppManager.currentUser != null) {
                         System.out.println("selamat datang " + nama);
-                    }else {
+                    } else {
                         System.out.println("username tidak ada, silahkan registrasi terlebih dahulu");
                     }
+                }
+                case 3 -> {
+                    String nama = scanner.nextLine();
+                    System.out.println("Selamat Datang" + nama);
+                }
+                case 4 -> {
+                    System.out.println("User Data");
+
+                }
+                case 5 -> {
+
+                }
+                case 6 -> {
+
+                }
+                case 7 -> {
+
+                }
+                case 8 -> {
+                    System.out.println("terimakasih silakan datang kembali");
+                    scanner.close();
+                }
+                default -> {
+                    System.out.println("masukan pilihan tidak valild");
                 }
             }
         }
@@ -79,14 +102,15 @@ public class UnitTest {
             System.out.println("5.Tampilkan community data");
             System.out.println("6.Tampilkan Event Data");
             System.out.println("7.Tampilkan Quest Data");
+            System.out.println("8.Keluar");
             System.out.print("Masukkan pilihan: ");
             choice = scanner.nextInt();
 
-            if (choice >= 1 && choice <= 7) {
+            if (choice >= 1 && choice <= 8) {
                 return choice;
             }
             else {
-                System.out.println("Tolong Pilih 1-7");
+                System.out.println("Tolong Pilih 1-8");
             }
 
         }
