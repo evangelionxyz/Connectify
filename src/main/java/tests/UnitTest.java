@@ -67,8 +67,9 @@ public class UnitTest {
                     System.out.println("Selamat Datang" + nama);
                 }
                 case 4 -> {
+                    String nama = scanner.nextLine();
                     System.out.println("User Data");
-
+                    System.out.println(nama);
                 }
                 case 5 -> {
 
