@@ -83,10 +83,92 @@ public class UnitTest {
 
                 }
                 case 6 -> {
-
+                    
                 }
                 case 7 -> {
+                    if (AppManager.currentUser == null) {
+                        System.out.println("Silakan login terlebih dahulu untuk mengakses quest.");
+                        break;
+                    }
 
+                    if (AppManager.currentUser instanceof Mahasiswa mahasiswa) {
+                        // Display quests for the current logged-in "Mahasiswa"
+                        List<Quest> quests = mahasiswa.getQuests();
+                        if (quests.isEmpty()) {
+                            System.out.println("Tidak ada quest untuk saat ini.");
+                            break;
+                        }
+
+                        System.out.println("Daftar Quest:");
+                        for (int i = 0; i < quests.size(); i++) {
+                            System.out.println((i + 1) + ". " + quests.get(i).getTitle());
+                        }
+
+                        System.out.print("Pilih nomor quest untuk detail (atau 0 untuk kembali): ");
+                        int questChoice = scanner.nextInt();
+
+                        if (questChoice > 0 && questChoice <= quests.size()) {
+                            Quest selectedQuest = quests.get(questChoice - 1);
+                            System.out.println("Detail Quest:");
+                            System.out.println("Judul: " + selectedQuest.getTitle());
+                            System.out.println("Deskripsi: " + selectedQuest.getDescription());
+
+                            System.out.print("Tandai quest ini sebagai selesai? (iya/tidak): ");
+                            String completeChoice = scanner.next();
+
+                            if (completeChoice.equalsIgnoreCase("iya")) {
+                                selectedQuest.doQuest();
+                                System.out.println("Quest berhasil diselesaikan!");
+                            } else {
+                                System.out.println("Quest tidak ditandai sebagai selesai.");
+                            }
+                        } else {
+                            System.out.println("Kembali ke menu utama.");
+                        }
+                    } else {
+                        System.out.println("Hanya mahasiswa yang dapat mengakses quest.");
+                    }
+                    if (AppManager.currentUser == null) {
+                        System.out.println("Silakan login terlebih dahulu untuk mengakses quest.");
+                        break;
+                    }
+
+                    if (AppManager.currentUser instanceof Mahasiswa mahasiswa) {
+                        List<Quest> quests = mahasiswa.getQuests();
+                        if (quests.isEmpty()) {
+                            System.out.println("Tidak ada quest untuk saat ini.");
+                            break;
+                        }
+
+                        System.out.println("Daftar Quest:");
+                        for (int i = 0; i < quests.size(); i++) {
+                            System.out.println((i + 1) + ". " + quests.get(i).getTitle());
+                        }
+
+                        System.out.print("Pilih nomor quest untuk detail (atau 0 untuk kembali): ");
+                        int questChoice = scanner.nextInt();
+
+                        if (questChoice > 0 && questChoice <= quests.size()) {
+                            Quest selectedQuest = quests.get(questChoice - 1);
+                            System.out.println("Detail Quest:");
+                            System.out.println("Judul: " + selectedQuest.getTitle());
+                            System.out.println("Deskripsi: " + selectedQuest.getDescription());
+
+                            System.out.print("Tandai quest ini sebagai selesai? (iya/tidak): ");
+                            String completeChoice = scanner.next();
+
+                            if (completeChoice.equalsIgnoreCase("iya")) {
+                                selectedQuest.doQuest();
+                                System.out.println("Quest berhasil diselesaikan!");
+                            } else {
+                                System.out.println("Quest tidak ditandai sebagai selesai.");
+                            }
+                        } else {
+                            System.out.println("Kembali ke menu utama.");
+                        }
+                    } else {
+                        System.out.println("Hanya mahasiswa yang dapat mengakses quest.");
+                    }
                 }
                 case 8 -> {
                     System.out.println("terimakasih silakan datang kembali");

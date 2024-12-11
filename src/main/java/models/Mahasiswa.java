@@ -28,6 +28,11 @@ public class Mahasiswa extends User {
         return achievements;
     }
 
+    public final List<Quest> getQuests() {
+        return quests;
+    }
+
+
     @Override
     public String toString() {
         return String.format("Name: %s, ID: %s", name, id);
