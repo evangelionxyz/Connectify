@@ -8,7 +8,7 @@ import core.AppManager;
 import core.EncryptionUtils;
 import kotlin.Unit;
 import models.*;
-
+//todo : cara menyelesainkan quest yang di dalam event, kalau udh selesai ditandain dan dapet reward
 public class UnitTest {
 
     public UnitTest() {
@@ -63,10 +63,34 @@ public class UnitTest {
                     }
                 }
                 case 3 -> {
-                    String nama = scanner.nextLine();
-                    System.out.println("Selamat Datang" + nama);
+                    System.out.println("selamat datang di menu tambah quest");
+                    if (AppManager.currentUser == null) {
+                        System.out.println("silahkan login dahulu!");
+                        break;
+                    }
+
+                    if (AppManager.currentUser instanceof HRD hrd) {
+                        System.out.println("menambahkan quest baru");
+                        scanner.nextLine();
+                        System.out.print("masukan judul Quest");
+                        String questTitle = scanner.nextLine();
+
+                        System.out.print("masukan deskripsi quest");
+                        String questDescription = scanner.nextLine();
+
+
+                        Quest newQuest = new Quest(questTitle, questDescription);
+                        hrd.equals(newQuest);
+
+                        System.out.println("Quest berhasil ditambahkan!");
+                    } else {
+                        System.out.println("hanya hrd yang bisa menambahkan quest!");
+                    }
                 }
                 case 4 -> {
+
+                }
+                case 5 -> {
                     if (AppManager.currentUser == null) {
                         System.out.println("Silakan login terlebih dahulu untuk melihat data pengguna.");
                     } else {
@@ -79,11 +103,8 @@ public class UnitTest {
                         System.out.println("============================================");
                     }
                 }
-                case 5 -> {
-
-                }
                 case 6 -> {
-                    
+                    System.out.println("selamat datang di menu tambah quest");
                 }
                 case 7 -> {
                     if (AppManager.currentUser == null) {
@@ -188,20 +209,21 @@ public class UnitTest {
             System.out.println("____Conectify____");
             System.out.println("1.Register");
             System.out.println("2.Login");
-            System.out.println("3.Beranda");
-            System.out.println("4.Tampilkan user data");
-            System.out.println("5.Tampilkan community data");
-            System.out.println("6.Tampilkan Event Data");
-            System.out.println("7.Tampilkan Quest Data");
-            System.out.println("8.Keluar");
-            System.out.print("Masukkan pilihan: ");
+            System.out.println("3.Tambah Quest");
+            System.out.println("4.Tambah Event");
+            System.out.println("5.Tampilkan user data");
+            System.out.println("6.Tampilkan community data");
+            System.out.println("7.Tampilkan Event Data");
+            System.out.println("8.Tampilkan Quest Data");
+            System.out.println("9.Keluar");
+            System.out.print("Maukkan pilihan: ");
             choice = scanner.nextInt();
 
-            if (choice >= 1 && choice <= 8) {
+            if (choice >= 1 && choice <= 9) {
                 return choice;
             }
             else {
-                System.out.println("Tolong Pilih 1-8");
+                System.out.println("Tolong Pilih 1-9");
             }
 
         }
