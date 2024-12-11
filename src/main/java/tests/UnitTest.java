@@ -67,9 +67,17 @@ public class UnitTest {
                     System.out.println("Selamat Datang" + nama);
                 }
                 case 4 -> {
-                    String nama = scanner.nextLine();
-                    System.out.println("User Data");
-                    System.out.println(nama);
+                    if (AppManager.currentUser == null) {
+                        System.out.println("Silakan login terlebih dahulu untuk melihat data pengguna.");
+                    } else {
+                        System.out.println("============== Informasi User ==============");
+                        User currentUser = AppManager.currentUser;
+                        System.out.println("Nama     : " + currentUser.getName());
+                        System.out.println("Username : " + currentUser.getUsername());
+                        System.out.println("Role     : " + currentUser.getType());
+                        System.out.println("Password : " + currentUser.getPassword());
+                        System.out.println("============================================");
+                    }
                 }
                 case 5 -> {
 
