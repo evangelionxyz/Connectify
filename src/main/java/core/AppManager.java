@@ -351,6 +351,95 @@ public class AppManager {
         }
     }
 
+    public static Quest getQuestById(String questId) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("quests", "id", questId);
+            QueryDocumentSnapshot doc = q.getDocuments().get(0);
+            String title = doc.getString("title");
+            String description = doc.getString("description");
+            boolean isCompleted = doc.getBoolean("isCompleted");
+
+            Quest quest = new Quest(title, description);
+            quest.setId(questId);
+            if (isCompleted) {
+                quest.doQuest();
+            }
+            return quest;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Event getEventByName(String eventName) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("events", "title", eventName);
+            if (q.isEmpty()) {
+                throw new RuntimeException("Event with name " + eventName + " not found.");
+            }
+            QueryDocumentSnapshot doc = q.getDocuments().get(0);
+            String id = doc.getString("id");
+            String title = doc.getString("title");
+            String description = doc.getString("description");
+            List<String> mahasiswaIds = (List<String>) doc.get("mahasiswaIds");
+            List<String> questsIds = (List<String>) doc.get("questsIds");
+            String creatorId = doc.getString("creatorId");
+            List<String> communityIds = (List<String>) doc.get("communityIds");
+
+            Event event = new Event(title);
+            event.setId(id);
+            event.setDescription(description);
+            event.setMahasiswaIds(mahasiswaIds);
+            event.setQuestsIds(questsIds);
+            event.setCreatorId(creatorId);
+            event.setCommunityIds(communityIds);
+
+            return event;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Quest getQuestByName(String questName) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("quests", "title", questName);
+            if (q.isEmpty()) {
+                throw new RuntimeException("Quest with name " + questName + " not found.");
+            }
+            QueryDocumentSnapshot doc = q.getDocuments().get(0);
+            String id = doc.getString("id");
+            String title = doc.getString("title");
+            String description = doc.getString("description");
+            boolean isCompleted = doc.getBoolean("isCompleted");
+
+            Quest quest = new Quest(title, description);
+            quest.setId(id);
+            if (isCompleted) {
+                quest.doQuest(); // Mark as completed if already done in DB
+            }
+            return quest;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public static void addAchievement(String achievementName, List<String> tags) {
+        try {
+            Achievement newAchievement = new Achievement(achievementName, tags);
+
+            Map<String, Object> achievementData = new HashMap<>();
+            achievementData.put("name", newAchievement.getName());
+            achievementData.put("tags", newAchievement.getTags());
+
+            addAchievement("achievements", (List<String>) achievementData);
+
+            System.out.println("Achievement successfully added!");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add achievement: " + e.getMessage(), e);
+        }
+    }
+
+
     /// ------------------------------------
     /// Communities section
     /// ------------------------------------

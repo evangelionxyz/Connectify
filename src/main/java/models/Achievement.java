@@ -49,7 +49,6 @@ public class Achievement extends ModelBase {
             System.out.println("berhasil menghapus tags");
         }else {
             System.out.println("tags kosong tidak dapat menghapus!");
-//            ini gw ubah dikit
         }
     }
 }
