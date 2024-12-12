@@ -78,8 +78,8 @@ public class UnitTest {
                         System.out.print("masukan deskripsi quest");
                         String questDescription = scanner.nextLine();
 
-
                         Quest newQuest = new Quest(questTitle, questDescription);
+
 
                         System.out.println("Quest berhasil ditambahkan!");
                     } else {
@@ -88,6 +88,34 @@ public class UnitTest {
                 }
                 case 4 -> {
                     System.out.println("selamat datang di menu tambah event");
+
+                    if (AppManager.currentUser == null) {
+                        System.out.println("silahkan login terlebih dahulu");
+                        break;
+                    }
+                    if (AppManager.currentUser.isHRD()) {
+                        System.out.println("Masukan judul event: ");
+                        String eventTitle = scanner.nextLine();
+
+                        Event newEvent = new Event(eventTitle);
+
+                        System.out.println("Masukan deskripsi event: ");
+                        String eventDescription = scanner.nextLine();
+                        newEvent.setDescription(eventDescription);
+
+                        System.out.println("Masukan ID Quest(pisahkan dengan koma): ");
+                        String questIdsInput = scanner.nextLine();
+                        String[] questIds = questIdsInput.split(",");
+
+                        for (String questId : questIds) {
+                            Quest quest = AppManager.getQuestById(questId.trim());
+                            newEvent.addQuest(quest);
+                        }
+                        System.out.println("Event berhasil ditambahkan");
+                    }else {
+                        System.out.println("Hanya HRD yang bisa menambahkan event");
+                    }
+                    System.out.println("Apakah Anda ingin menyelesaikan quest di event ini? (ya/tidak)");
                 }
                 case 5 -> {
                     if (AppManager.currentUser == null) {

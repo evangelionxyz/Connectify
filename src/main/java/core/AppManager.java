@@ -349,6 +349,26 @@ public class AppManager {
         }
     }
 
+    public static Quest getQuestById(String questId) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("quests", "id", questId);
+            QueryDocumentSnapshot doc = q.getDocuments().get(0);
+            String title = doc.getString("title");
+            String description = doc.getString("description");
+            boolean isCompleted = doc.getBoolean("isCompleted");
+
+            Quest quest = new Quest(title, description);
+            quest.setId(questId);
+            if (isCompleted) {
+                quest.doQuest();
+            }
+            return quest;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     /// ------------------------------------
     /// Communities section
     /// ------------------------------------
