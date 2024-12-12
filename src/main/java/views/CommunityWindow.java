@@ -7,15 +7,29 @@ import imgui.ImVec2;
 import imgui.ImVec4;
 import imgui.flag.*;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import models.*;
+
+import java.util.ArrayList;
 
 public class CommunityWindow extends WindowBase {
     private final ImBoolean imCreateWin = new ImBoolean(false);
     private final ImString nameInput = new ImString(256);
     private final ImString userChatInput = new ImString(256);
 
+    private final ImInt imIntIndex = new ImInt(-1);
+    private String selectedEventStr;
+
+    private ArrayList<Integer> selectedIndices = new ArrayList<>();
+    private String filter = "";
+
     private Community communityContextOpen = null;
+
+    @Override
+    public void init() {
+        selectedEventStr = "";
+    }
 
     private void createWindow() {
         ImGui.begin("Create new community", imCreateWin, ImGuiWindowFlags.AlwaysAutoResize);
@@ -35,10 +49,6 @@ public class CommunityWindow extends WindowBase {
             imCreateWin.set(false);
         }
         ImGui.end();
-    }
-
-    @Override
-    public void init() {
     }
 
     @Override
@@ -127,23 +137,66 @@ public class CommunityWindow extends WindowBase {
 
             ImGui.beginChild("##community_send_message", new ImVec2(0.0f, 0.0f), true);
             {
-                Runnable sendMessage = () -> {
-                    if (userChatInput.isNotEmpty()) {
-                        Chat newChat = new Chat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
-                        AppManager.addChatToCommunity(AppManager.selectedCommunity, newChat);
-                        userChatInput.clear();
+                if (AppManager.currentUser.isMahasiswa()) {
+                    Runnable sendMessage = () -> {
+                        if (userChatInput.isNotEmpty()) {
+                            Chat newChat = new Chat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
+                            AppManager.addChatToCommunity(AppManager.selectedCommunity, newChat);
+                            userChatInput.clear();
+                        }
+                    };
+                    ImGui.inputText("##chat", userChatInput);
+                    ImGui.sameLine();
+                    if (ImGui.button("Send", new ImVec2(200.0f, ImGui.getContentRegionAvail().y))) {
+                        sendMessage.run();
                     }
-                };
-
-                ImGui.inputText("##chat", userChatInput);
-
-                ImGui.sameLine();
-                if (ImGui.button("Send", new ImVec2(200.0f, ImGui.getContentRegionAvail().y))) {
-                    sendMessage.run();
+                    if (ImGui.isKeyPressed(ImGuiKey.Enter)) {
+                        sendMessage.run();
+                    }
                 }
-                if (ImGui.isKeyPressed(ImGuiKey.Enter)) {
-                    sendMessage.run();
+                else {
+
+                    Runnable sendEventChat = () -> {
+                        EventChat eventChat = new EventChat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
+                        AppManager.addChatToCommunity(AppManager.selectedCommunity, eventChat);
+                        userChatInput.clear();
+                    };
+
+                    if (ImGui.beginCombo("Select events", "Selected "+selectedIndices.size() + " items")) {
+                        for (int i = 0; i < AppManager.eventTitles.size(); ++i) {
+                            String title = AppManager.eventTitles.get(i);
+
+                            if (!filter.isEmpty() && !title.toLowerCase().contains(filter.toLowerCase())) {
+                                continue;
+                            }
+
+                            boolean isSelected = selectedIndices.contains(i);
+
+                            if (ImGui.selectable(title, isSelected)) {
+                                if (isSelected) {
+                                    selectedIndices.remove(Integer.valueOf(i));
+                                } else {
+                                    selectedIndices.add(i);
+                                }
+                            }
+                        }
+                        ImGui.endCombo();
+                    }
+
+                    if (!selectedIndices.isEmpty()) {
+                        ImGui.text("Selected Events:");
+                        for (int index : selectedIndices) {
+                            ImGui.text("- "+AppManager.eventTitles.get(index));
+                        }
+                    }
+
+                    ImGui.sameLine();
+                    if (ImGui.button("Send", new ImVec2(200.0f, ImGui.getContentRegionAvail().y))) {
+                        sendEventChat.run();
+                    }
                 }
+
+
             }
             ImGui.endChild(); // !community_send_message
 

@@ -18,42 +18,48 @@ public class UnitTest {
     public void run() {
         Scanner scanner = new Scanner(System.in);
 
+        Quest newQuestdummy = new Quest("questTitledummy", "questDescriptiondummy");
+        AppManager.quests.add(newQuestdummy);
+
         // Dummy User
-        User dummyUser = new User("Dummy Name", "dummyUsername", "HRD", "Dummy Company", "password123");
-
-        // Dummy Mahasiswa
-        Mahasiswa dummyMahasiswa = new Mahasiswa("Dummy Mahasiswa", "dummyMahasiswaUsername", "Dummy University");
-        dummyMahasiswa.addQuest(new Quest("Quest 1", "Description for Quest 1"));
-
-        // Dummy HRD
-        HRD dummyHRD = new HRD("Dummy HRD", "dummyHRDUsername", "Dummy Company");
-
-        // Dummy Quest
-        Quest dummyQuest = new Quest("Dummy Quest", "This is a dummy quest description.");
-
-        // Dummy Achievement
-        List<String> tags = new ArrayList<>();
-        tags.add("Tag1");
-        tags.add("Tag2");
-        Achievement dummyAchievement = new Achievement("Dummy Achievement", tags);
-
-        // Dummy Event
-        Event dummyEvent = new Event("Dummy Event");
-        dummyEvent.setDescription("This is a dummy event description.");
-        dummyEvent.addQuest(dummyQuest);
-        dummyEvent.addMahasiswa(dummyMahasiswa);
-
-        // Dummy Community
-        Community dummyCommunity = new Community("Dummy Community", dummyUser);
-        dummyCommunity.addMahasiswa(dummyMahasiswa);
-        dummyCommunity.addQuest(dummyQuest);
-
-        // Dummy Chat
-        Chat dummyChat = new Chat("Hello, this is a dummy chat!", null, dummyUser);
-
-        // Dummy EventChat
-        EventChat dummyEventChat = new EventChat("Event Chat Message", null, dummyUser);
-        dummyEventChat.setEvent(dummyEvent);
+//        User dummyUser = new User("Dummy Name", "dummyUsername", "HRD", "Dummy Company", "password123");
+//
+//        // Dummy Mahasiswa
+//        Mahasiswa dummyMahasiswa = new Mahasiswa("Dummy Mahasiswa", "dummyMahasiswaUsername", "Dummy University");
+//        dummyMahasiswa.addQuest(new Quest("Quest 1", "Description for Quest 1"));
+//
+//        // Dummy HRD
+//        HRD dummyHRD = new HRD("Dummy HRD", "dummyHRDUsername", "Dummy Company");
+//
+//        // Dummy Quest
+//        Quest dummyQuest = new Quest("Dummy Quest", "This is a dummy quest description.");
+//
+//        // Dummy Achievement
+//        List<String> tags = new ArrayList<>();
+//        tags.add("Tag1");
+//        tags.add("Tag2");
+//        Achievement dummyAchievement = new Achievement("Dummy Achievement", tags);
+//
+//        // Dummy Event
+//        Event dummyEvent = new Event("Dummy Event");
+//        dummyEvent.setDescription("This is a dummy event description.");
+//        dummyEvent.addQuest(dummyQuest);
+//        dummyEvent.addMahasiswa(dummyMahasiswa);
+//
+//        // Dummy Community
+//        Community dummyCommunity = new Community("Dummy Community", dummyUser);
+//        dummyCommunity.addMahasiswa(dummyMahasiswa);
+//        dummyCommunity.addQuest(dummyQuest);
+//
+//        // Dummy Chat
+//        Chat dummyChat = new Chat("Hello, this is a dummy chat!", null, dummyUser);
+//
+//        // Dummy EventChat
+//        EventChat dummyEventChat = new EventChat("Event Chat Message", null, dummyUser);
+//
+//        Quest[] newQuest1 = {new Quest("DPBO tests", "Quiz sub clo dpbo")};
+//
+//        dummyEventChat.setEvent(dummyEvent);
 
         System.out.println("Application running");
 
@@ -97,11 +103,12 @@ public class UnitTest {
                     }
                 }
                 case 3 -> {
-                    System.out.println("Selamat datang di menu tambah quest");
                     if (AppManager.currentUser == null) {
                         System.out.println("Silahkan login dahulu!");
                         break;
                     }
+
+                    System.out.println("Selamat datang di menu tambah quest");
 
                     if (AppManager.currentUser.isHRD()) {
                         System.out.print("Masukan judul Quest: ");
@@ -111,72 +118,15 @@ public class UnitTest {
                         String questDescription = scanner.nextLine();
 
                         Quest newQuest = new Quest(questTitle, questDescription);
-
+                        AppManager.quests.add(newQuest);
                         System.out.println("Quest berhasil ditambahkan!");
                     } else {
                         System.out.println("Hanya HRD yang bisa menambahkan quest!");
                     }
                 }
+
                 case 4 -> {
-                    if (AppManager.currentUser == null) {
-                        System.out.println("Silahkan login terlebih dahulu");
-                        break;
-                    }
-                    System.out.println("Selamat datang di menu tambah event");
-
-                    if (AppManager.currentUser.isHRD()) {
-                        System.out.print("Masukan judul event: ");
-                        String eventTitle = scanner.nextLine();
-
-                        Event newEvent = new Event(eventTitle);
-
-                        System.out.print("Masukan deskripsi event: ");
-                        String eventDescription = scanner.nextLine();
-                        newEvent.setDescription(eventDescription);
-
-                        System.out.print("Masukan ID Quest(pisahkan dengan koma): ");
-                        String questIdsInput = scanner.nextLine();
-                        String[] questIds = questIdsInput.split(",");
-
-                        for (String questName : questIds) {
-                            Quest quest = AppManager.getQuestByName(questName.trim());
-                            newEvent.addQuest(quest);
-                        }
-                        System.out.println("Event berhasil ditambahkan");
-                    } else {
-                        System.out.println("Hanya HRD yang bisa menambahkan event");
-                    }
-
-                    System.out.print("Apakah Anda ingin menyelesaikan quest di event ini? (ya/tidak): ");
-                    String jawab = scanner.nextLine();
-
-                    if (jawab.equalsIgnoreCase("ya")) {
-                        System.out.print("Masukan Id event: ");
-                        String eventName = scanner.nextLine();
-                        Event event = AppManager.getEventByName(eventName);
-
-                        if (event != null) {
-                            List<String> questIds = event.getQuestIDs();
-                            boolean allQuestCompleted = true;
-
-                            for (String questName : questIds) {
-                                Quest quest = AppManager.getQuestByName(questName);
-                                if (quest != null && !quest.isCompleted()) {
-                                    quest.doQuest();
-                                    System.out.println("Quest " + quest.getTitle() + " selesai");
-                                } else if (quest == null || quest.isCompleted()) {
-                                    allQuestCompleted = false;
-                                }
-                            }
-
-                            if (allQuestCompleted) {
-                                tags.add("CompletedAllQuests");
-                                tags.add("RewardUnlocked");
-
-                                AppManager.addAchievement("achievement-1", tags);
-                            }
-                        }
-                    }
+                    System.out.println("ini adalah case 4");
                 }
                 case 5 -> {
                     if (AppManager.currentUser == null) {
@@ -192,6 +142,7 @@ public class UnitTest {
                     }
                 }
                 case 6 -> {
+                    System.out.println("=======================================");
                     System.out.println("Menampilkan komunitas yang tersedia:");
 
                     if (AppManager.communities.isEmpty()) {
@@ -221,61 +172,14 @@ public class UnitTest {
                     }
                 }
                 case 7 -> {
-                    if (AppManager.currentUser == null) {
-                        System.out.println("Silakan login terlebih dahulu untuk mengakses quest.");
-                        break;
-                    }
-
-                    if (AppManager.currentUser.isMahasiswa()) {
-                        Mahasiswa mahasiswa = (Mahasiswa) AppManager.currentUser;
-
-                        List<String> questIds = new ArrayList<>();
-                        for (Quest quest : mahasiswa.getQuests()) {
-                            questIds.add(quest.getId());
-                        }
-
-                        List<Quest> quests = new ArrayList<>();
-                        for (String questId : questIds) {
-                            Quest quest = AppManager.getQuestById(questId);
-                            if (quest != null) {
-                                quests.add(quest);
-                            }
-                        }
-
-                        if (quests.isEmpty()) {
-                            System.out.println("Tidak ada quest untuk saat ini.");
-                            break;
-                        }
-
-                        System.out.println("Daftar Quest:");
-                        for (int i = 0; i < quests.size(); i++) {
-                            System.out.println((i + 1) + ". " + quests.get(i).getTitle());
-                        }
-
-                        System.out.print("Pilih nomor quest untuk detail (atau 0 untuk kembali): ");
-                        int questChoice = scanner.nextInt();
-                        scanner.nextLine(); // Consume newline
-
-                        if (questChoice > 0 && questChoice <= quests.size()) {
-                            Quest selectedQuest = quests.get(questChoice - 1);
-                            System.out.println("Detail Quest:");
-                            System.out.println("Judul: " + selectedQuest.getTitle());
-                            System.out.println("Deskripsi: " + selectedQuest.getDescription());
-
-                            System.out.print("Tandai quest ini sebagai selesai? (iya/tidak): ");
-                            String completeChoice = scanner.next();
-
-                            if (completeChoice.equalsIgnoreCase("iya")) {
-                                selectedQuest.doQuest();
-                                System.out.println("Quest berhasil diselesaikan!");
-                            } else {
-                                System.out.println("Quest tidak ditandai sebagai selesai.");
-                            }
-                        } else {
-                            System.out.println("Kembali ke menu utama.");
-                        }
+                    System.out.println("Daftar Quest:");
+                    if (AppManager.quests.isEmpty()) {
+                        System.out.println("Belum ada quest yang ditambahkan.");
                     } else {
-                        System.out.println("Hanya mahasiswa yang dapat mengakses quest.");
+                        for (Quest quest : AppManager.quests) {
+                            System.out.println("- " + quest.getTitle() + ": " + quest.getDescription() +
+                                    " | Status: " + (quest.isCompleted() ? "Selesai" : "Belum Selesai"));
+                        }
                     }
                 }
                 case 8 -> {
@@ -303,6 +207,7 @@ public class UnitTest {
                                 } else {
                                     System.out.println("- Quest dengan ID " + questId + " tidak ditemukan.");
                                 }
+                                System.out.println("=======================================");
                             }
                         }
                     }

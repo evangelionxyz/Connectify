@@ -24,6 +24,9 @@ public class AppManager {
     public static Event selectedEvent = null;
     public static List<Community> communities = new ArrayList<>();
     public static List<Event> events = new ArrayList<>();
+    public static ArrayList<String> eventTitles = new ArrayList<>();
+    public static List<Quest> quests = new ArrayList<>();
+
 
     public static void initializeFirebase() throws IOException {
         FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");
@@ -257,6 +260,7 @@ public class AppManager {
                         case ADDED -> {
                             Event event = eventCreateFromDocument(change.getDocument());
                             events.add(event);
+                            eventTitles.add(event.getTitle());
                         }
                         case MODIFIED -> {
                             if (localEvent != null) {
@@ -348,6 +352,8 @@ public class AppManager {
             throw new RuntimeException(e);
         }
     }
+
+
 
     public static Quest getQuestById(String questId) {
         try {
