@@ -105,17 +105,49 @@ public class UnitTest {
 
                         System.out.println("Masukan ID Quest(pisahkan dengan koma): ");
                         String questIdsInput = scanner.nextLine();
-                        String[] questIds = questIdsInput.split(",");
+                        String[] questIds = questIdsInput.split("");
 
-                        for (String questId : questIds) {
-                            Quest quest = AppManager.getQuestById(questId.trim());
+                        for (String questName : questIds) {
+                            Quest quest = AppManager.getQuestByName(questName);
                             newEvent.addQuest(quest);
                         }
                         System.out.println("Event berhasil ditambahkan");
                     }else {
                         System.out.println("Hanya HRD yang bisa menambahkan event");
                     }
+
                     System.out.println("Apakah Anda ingin menyelesaikan quest di event ini? (ya/tidak)");
+                    String jawab = scanner.nextLine();
+
+                    if (jawab.equalsIgnoreCase("ya")) {
+                        System.out.println("Masukan Id event: ");
+                        String eventName = scanner.nextLine();
+                        Event event = AppManager.getEventByName(eventName);
+
+                        if (event != null) {
+                            List<String> questIds = event.getQuestIDs();
+                            boolean allQuestCompleted = true;
+
+                            for (String questName : questIds) {
+                                Quest quest = AppManager.getQuestByName(questName);
+                                if (quest != null && !quest.isCompleted()) {
+                                    quest.doQuest();
+                                    System.out.println("Quest" + quest.getTitle() + " selesai");
+                                } else if (quest == null || quest.isCompleted()) {
+                                    allQuestCompleted = false;
+                                }
+                            }
+
+                            if (allQuestCompleted) {
+                                List<String> tags = new ArrayList<>();
+                                tags.add("CompletedAllQuests");
+                                tags.add("RewardUnlocked");
+
+                                AppManager.addAchievement("achievement-1", tags);
+                            }
+                        }
+                    }
+                    scanner.close();
                 }
                 case 5 -> {
                     if (AppManager.currentUser == null) {
