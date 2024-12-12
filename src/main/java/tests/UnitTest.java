@@ -69,7 +69,7 @@ public class UnitTest {
                         break;
                     }
 
-                    if (AppManager.currentUser instanceof HRD hrd) {
+                    if (AppManager.currentUser.isHRD()) {
                         System.out.println("menambahkan quest baru");
                         scanner.nextLine();
                         System.out.print("masukan judul Quest");
@@ -80,7 +80,6 @@ public class UnitTest {
 
 
                         Quest newQuest = new Quest(questTitle, questDescription);
-                        hrd.equals(newQuest);
 
                         System.out.println("Quest berhasil ditambahkan!");
                     } else {
@@ -88,7 +87,7 @@ public class UnitTest {
                     }
                 }
                 case 4 -> {
-
+                    System.out.println("selamat datang di menu tambah event");
                 }
                 case 5 -> {
                     if (AppManager.currentUser == null) {
