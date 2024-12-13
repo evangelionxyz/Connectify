@@ -172,7 +172,7 @@ public class UnitTest {
                     }
                 }
                 case 7 -> {
-                    System.out.println("Daftar Quest:");
+                    System.out.println("Daftar Quest Harian:");
                     if (AppManager.quests.isEmpty()) {
                         System.out.println("Belum ada quest yang ditambahkan.");
                     } else {
