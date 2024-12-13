@@ -162,7 +162,12 @@ public class UnitTest {
                             }
                         }
                         case 3 -> {
-                            System.out.println("ini adalah case 4-3");
+                            System.out.println("masukan quest yang ingin dikerjakan: ");
+                            if (AppManager.currentUser.isMahasiswa()) {
+                                String questTitle = scanner.nextLine();
+
+                                Quest selectedQuest = AppManager.getQuestByName(questTitle);
+                            }
                         }
                         default -> {
                             System.out.println("Pilihan tidak valid.");
@@ -219,7 +224,6 @@ public class UnitTest {
                     if (AppManager.currentUser == null) {
                         System.out.println("Silahkan login terlebih dahulu");
                         System.out.println("=======================================");
-                        break;
                     }
 
                     System.out.println("Daftar Quest:");
@@ -260,7 +264,7 @@ public class UnitTest {
                         System.out.println("Tidak ada event yang tersedia.");
                     } else {
                         for (Event event : AppManager.events) {
-                            System.out.println("=======================================");
+                            System.out.println("============ Pembatas =============");
                             System.out.println("Nama Event: " + event.getTitle());
                             System.out.println("Deskripsi: " + event.getDescription());
                             System.out.println("Penyelenggara (Creator ID): " + event.getCreatorId());
@@ -283,8 +287,8 @@ public class UnitTest {
                                 } else {
                                     System.out.println("- Quest dengan ID " + questId + " tidak ditemukan.");
                                 }
-                                System.out.println("=======================================");
                             }
+                        System.out.println("===================================");
                         }
                     }
                 }
