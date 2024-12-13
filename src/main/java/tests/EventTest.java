@@ -17,9 +17,9 @@ public class EventTest {
         Mahasiswa syahdan = new Mahasiswa("syahdan", "syahdan", "telu");
         Mahasiswa yudha = new Mahasiswa("yuda", "yuda", "telu");
         Mahasiswa nopal = new Mahasiswa("nopal", "nopal", "telu");
-        hackathon.addMahasiswa(syahdan);
-        hackathon.addMahasiswa(yudha);
-        hackathon.addMahasiswa(nopal);
+        hackathon.addMahasiswa(syahdan.getId());
+        hackathon.addMahasiswa(yudha.getId());
+        hackathon.addMahasiswa(nopal.getId());
 
         Quest quest1 = new Quest("Buat Presentasi", "Membuat Presentasi tentang C++");
         Quest quest2 = new Quest("Bentuk Kelompok", "Buat Kelompok Maksimal 5 orang dan berfoto bersama mereka");
