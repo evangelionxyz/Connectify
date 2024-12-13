@@ -214,7 +214,12 @@ public class UnitTest {
                             }
                         }
                         case 3 -> {
-                            System.out.println("ini adalah case 4-3");
+                            System.out.println("masukan quest yang ingin dikerjakan: ");
+                            if (AppManager.currentUser.isMahasiswa()) {
+                                String questTitle = scanner.nextLine();
+
+                                Quest selectedQuest = AppManager.getQuestByName(questTitle);
+                            }
                         }
                         default -> {
                             System.out.println("Pilihan tidak valid.");
