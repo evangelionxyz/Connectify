@@ -95,10 +95,25 @@ public class AppManager {
         }
     }
 
+    public static void addAchievement(String achievementName, List<String> tags) {
+        try {
+            Achievement newAchievement = new Achievement(achievementName, tags);
 
+            Map<String, Object> achievementData = new HashMap<>();
+            achievementData.put("name", newAchievement.getName());
+            achievementData.put("tags", newAchievement.getTags());
+
+            addAchievement("achievements", (List<String>) achievementData);
+
+            System.out.println("Achievement successfully added!");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add achievement: " + e.getMessage(), e);
+        }
+    }
 
     // ===========================
     // !TEST
+
     public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = user.getStringObjectMap();
@@ -425,24 +440,6 @@ public class AppManager {
             throw new RuntimeException(e);
         }
     }
-
-
-    public static void addAchievement(String achievementName, List<String> tags) {
-        try {
-            Achievement newAchievement = new Achievement(achievementName, tags);
-
-            Map<String, Object> achievementData = new HashMap<>();
-            achievementData.put("name", newAchievement.getName());
-            achievementData.put("tags", newAchievement.getTags());
-
-            addAchievement("achievements", (List<String>) achievementData);
-
-            System.out.println("Achievement successfully added!");
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to add achievement: " + e.getMessage(), e);
-        }
-    }
-
 
     /// ------------------------------------
     /// Communities section
