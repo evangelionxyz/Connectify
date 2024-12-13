@@ -31,7 +31,7 @@ public class User extends ModelBase {
     }
 
     public boolean isMahasiswa() {
-        return type.equalsIgnoreCase("mahasiswa");
+        return type.equalsIgnoreCase("mahasiswa") || type.equalsIgnoreCase("mhs");
     }
 
     public boolean isHRD() {

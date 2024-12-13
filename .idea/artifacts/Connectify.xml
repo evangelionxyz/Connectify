@@ -1,0 +1,6 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Connectify">
+    <output-path>$PROJECT_DIR$/out/artifacts/Connectify</output-path>
+    <root id="archive" name="Connectify.jar" />
+  </artifact>
+</component>

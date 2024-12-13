@@ -51,8 +51,8 @@ public class Event extends ModelBase {
         this.title = title;
     }
 
-    public void addMahasiswa(Mahasiswa mhs) {
-        mahasiswaIds.add(mhs.getId());
+    public void addMahasiswa(String mhsId) {
+        mahasiswaIds.add(mhsId);
     }
 
     public void addQuest(Quest quest) {
