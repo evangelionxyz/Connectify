@@ -302,7 +302,6 @@ public class UnitTest {
                     if (AppManager.currentUser == null) {
                         System.out.println("Silahkan login terlebih dahulu");
                         System.out.println("=======================================");
-                        break;
                     }
 
                     System.out.println("Daftar Quest:");
