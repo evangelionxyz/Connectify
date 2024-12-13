@@ -50,9 +50,9 @@ public class AppManager {
         }
     }
 
-    // ===========================
-    // !TEST
-
+    /// ------------------------------------
+    /// User section
+    /// ------------------------------------
     public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = user.getStringObjectMap();
@@ -145,6 +145,10 @@ public class AppManager {
         }
     }
 
+    /// ------------------------------------
+    /// Chat section
+    /// ------------------------------------
+
     public static Chat getChatById(String chatId) {
         try {
             QuerySnapshot q = getQueryByFieldValue("chats", "id", chatId);
@@ -195,6 +199,7 @@ public class AppManager {
     /// ------------------------------------
     /// Event section
     /// ------------------------------------
+
     private static void eventStartListening() {
         firestore.collection("events").addSnapshotListener((snapshot, error) -> {
             if (error != null) {

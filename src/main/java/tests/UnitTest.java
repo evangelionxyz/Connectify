@@ -1,10 +1,6 @@
 package tests;
 
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
-
 import core.AppManager;
 import core.EncryptionUtils;
 import models.*;
@@ -17,57 +13,6 @@ public class UnitTest {
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
-
-        Quest newQuestdummy = new Quest("questTitledummy", "questDescriptiondummy");
-        AppManager.quests.add(newQuestdummy);
-
-        // Dummy Achievement
-        List<String> tags = new ArrayList<>();
-        tags.add("Tag1");
-        tags.add("Tag2");
-        Achievement dummyAchievement = new Achievement("Dummy Achievement", tags);
-
-        // Dummy User
-//        User dummyUser = new User("Dummy Name", "dummyUsername", "HRD", "Dummy Company", "password123");
-//
-//        // Dummy Mahasiswa
-//        Mahasiswa dummyMahasiswa = new Mahasiswa("Dummy Mahasiswa", "dummyMahasiswaUsername", "Dummy University");
-//        dummyMahasiswa.addQuest(new Quest("Quest 1", "Description for Quest 1"));
-//
-//        // Dummy HRD
-//        HRD dummyHRD = new HRD("Dummy HRD", "dummyHRDUsername", "Dummy Company");
-//
-//        // Dummy Quest
-//        Quest dummyQuest = new Quest("Dummy Quest", "This is a dummy quest description.");
-//
-//        // Dummy Achievement
-//        List<String> tags = new ArrayList<>();
-//        tags.add("Tag1");
-//        tags.add("Tag2");
-//        Achievement dummyAchievement = new Achievement("Dummy Achievement", tags);
-//
-//        // Dummy Event
-//        Event dummyEvent = new Event("Dummy Event");
-//        dummyEvent.setDescription("This is a dummy event description.");
-//        dummyEvent.addQuest(dummyQuest);
-//        dummyEvent.addMahasiswa(dummyMahasiswa);
-//
-//        // Dummy Community
-//        Community dummyCommunity = new Community("Dummy Community", dummyUser);
-//        dummyCommunity.addMahasiswa(dummyMahasiswa);
-//        dummyCommunity.addQuest(dummyQuest);
-//
-//        // Dummy Chat
-//        Chat dummyChat = new Chat("Hello, this is a dummy chat!", null, dummyUser);
-//
-//        // Dummy EventChat
-//        EventChat dummyEventChat = new EventChat("Event Chat Message", null, dummyUser);
-//
-//        Quest[] newQuest1 = {new Quest("DPBO tests", "Quiz sub clo dpbo")};
-//
-//        dummyEventChat.setEvent(dummyEvent);
-
-        System.out.println("Application running");
 
         while (true) {
             int option = menu();
@@ -95,6 +40,7 @@ public class UnitTest {
                     }
                     System.out.println("=======================================");
                 }
+
                 case 2 -> {
                     System.out.println("=======================================");
                     System.out.println("Selamat datang kembali silahkan login");
@@ -112,6 +58,7 @@ public class UnitTest {
                     }
                     System.out.println("=======================================");
                 }
+
                 case 3 -> {
                     System.out.println("=======================================");
                     if (AppManager.currentUser == null) {
@@ -167,13 +114,13 @@ public class UnitTest {
                     switch (choice) {
                         case 1 -> {
                             if (AppManager.currentUser.isHRD()) {
-                                System.out.print("Masukan judul event: ");
+                                System.out.print("Masukkan judul event: ");
                                 String eventTitle = scanner.nextLine();
 
                                 Event newEvent = new Event(eventTitle);
                                 newEvent.setCreatorId(AppManager.currentUser.getId());
 
-                                System.out.print("Masukan deskripsi event: ");
+                                System.out.print("Masukkan deskripsi event: ");
                                 String eventDescription = scanner.nextLine();
                                 newEvent.setDescription(eventDescription);
 
@@ -197,6 +144,7 @@ public class UnitTest {
                                 System.out.println("Hanya HRD yang bisa menambahkan event");
                             }
                         }
+
                         case 2 -> {
                             if (AppManager.currentUser.isMahasiswa()) {
                                 System.out.print("Masukkan judul event yang ingin diikuti: ");
@@ -221,37 +169,6 @@ public class UnitTest {
                         }
                     }
 
-
-                    /*System.out.print("Apakah Anda ingin menyelesaikan quest di event ini? (ya/tidak): ");
-                    String jawab = scanner.nextLine();
-
-                    if (jawab.equalsIgnoreCase("ya")) {
-                        System.out.print("Masukan Id event: ");
-                        String eventName = scanner.nextLine();
-                        Event event = AppManager.getEventByName(eventName);
-
-                        if (event != null) {
-                            List<String> questIds = event.getQuestIDs();
-                            boolean allQuestCompleted = true;
-
-                            for (String questName : questIds) {
-                                Quest quest = AppManager.getQuestByName(questName);
-                                if (quest != null && !quest.isCompleted()) {
-                                    quest.doQuest();
-                                    System.out.println("Quest " + quest.getTitle() + " selesai");
-                                } else if (quest == null || quest.isCompleted()) {
-                                    allQuestCompleted = false;
-                                }
-                            }
-
-                            if (allQuestCompleted) {
-                                tags.add("CompletedAllQuests");
-                                tags.add("RewardUnlocked");
-
-                                AppManager.addAchievement("achievement-1", tags);
-                            }
-                        }
-                    }*/
                     System.out.println("=======================================");
                 }
                 case 5 -> {
@@ -386,7 +303,7 @@ public class UnitTest {
         Scanner scanner = new Scanner(System.in);
         int choice = 1;
         while (true) {
-            System.out.println("____Conectify____");
+            System.out.println("------ Conectify ------");
             System.out.println("1. Register");
             System.out.println("2. Login");
             System.out.println("3. Tambah Quest");
