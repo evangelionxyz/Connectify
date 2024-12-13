@@ -236,13 +236,38 @@ public class UnitTest {
                     }
                 }
                 case 7 -> {
-                    System.out.println("Daftar Quest Harian:");
+                    if (AppManager.currentUser == null) {
+                        System.out.println("Silahkan login terlebih dahulu");
+                        break;
+                    }
+
+                    System.out.println("Daftar Quest:");
                     if (AppManager.quests.isEmpty()) {
                         System.out.println("Belum ada quest yang ditambahkan.");
                     } else {
-                        for (Quest quest : AppManager.quests) {
-                            System.out.println("- " + quest.getTitle() + ": " + quest.getDescription() +
+                        for (int i = 0; i < AppManager.quests.size(); i++) {
+                            Quest quest = AppManager.quests.get(i);
+                            System.out.println((i + 1) + ". " + quest.getTitle() + ": " + quest.getDescription() +
                                     " | Status: " + (quest.isCompleted() ? "Selesai" : "Belum Selesai"));
+                        }
+
+                        System.out.print("Masukkan nomor quest yang ingin dikerjakan: ");
+                        int questIndex = scanner.nextInt();
+                        scanner.nextLine();
+
+                        if (questIndex >= 1 && questIndex <= AppManager.quests.size()) {
+                            Quest selectedQuest = AppManager.quests.get(questIndex - 1);
+                            if (selectedQuest.isCompleted()) {
+                                System.out.println("Quest ini sudah selesai dikerjakan.");
+                            } else {
+                                selectedQuest.doQuest();
+                                System.out.println("Quest '" + selectedQuest.getTitle() + "' berhasil diselesaikan!");
+
+                                AppManager.quests.remove(selectedQuest);
+                                System.out.println("Quest '" + selectedQuest.getTitle() + "' telah dihapus dari daftar.");
+                            }
+                        } else {
+                            System.out.println("Nomor quest tidak valid.");
                         }
                     }
                 }
