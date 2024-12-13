@@ -342,7 +342,7 @@ public class UnitTest {
                         System.out.println("Tidak ada event yang tersedia.");
                     } else {
                         for (Event event : AppManager.events) {
-                            System.out.println("=======================================");
+                            System.out.println("============ Pembatas =============");
                             System.out.println("Nama Event: " + event.getTitle());
                             System.out.println("Deskripsi: " + event.getDescription());
                             System.out.println("Penyelenggara (Creator ID): " + event.getCreatorId());
@@ -365,8 +365,8 @@ public class UnitTest {
                                 } else {
                                     System.out.println("- Quest dengan ID " + questId + " tidak ditemukan.");
                                 }
-                                System.out.println("=======================================");
                             }
+                        System.out.println("===================================");
                         }
                     }
                 }
