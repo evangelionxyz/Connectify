@@ -11,16 +11,27 @@ public class Event extends ModelBase {
     private String title;
     private List<String> mahasiswaIds;
     private List<String> questsIds;
+    private String community;
     private String description;
     private String creatorId;
     private List<String> communityIds;
 
-    public Event(String title) {
+    public Event(String title, String community) {
         super();
         this.title = title;
+        this.community = community;
         this.mahasiswaIds = new ArrayList<>();
         this.questsIds = new ArrayList<>();
         this.communityIds = new ArrayList<>();
+    }
+
+    public String getCommunity() {
+        return community;
+    }
+
+
+    public void setCommunity(String community) {
+        this.community = community;
     }
 
     public void addCommunityId(String communityId) {

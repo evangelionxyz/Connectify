@@ -1,10 +1,6 @@
 package tests;
 
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
-
 import core.AppManager;
 import core.EncryptionUtils;
 import models.*;
@@ -15,59 +11,276 @@ public class UnitTest {
         System.out.println("Application created");
     }
 
+    private void communityMenu(Scanner scanner) {
+        // Menu Community
+        System.out.println("=======================================");
+        if (AppManager.currentUser == null) {
+            System.out.println("Silahkan login terlebih dahulu");
+            System.out.println("=======================================");
+            return;
+        }
+        System.out.println("Daftar komunitas yang tersedia:");
+
+        if (AppManager.communities.isEmpty()) {
+            System.out.println("Tidak ada komunitas yang tersedia.");
+        } else {
+            for (Community community : AppManager.communities) {
+                System.out.println("- " + community.getName());
+            }
+        }
+
+        System.out.println("Selamat datang di menu Community");
+        System.out.println("Pilih opsi:");
+        System.out.println("1. Event Menu");
+        System.out.println("2. Buat Komunitas (untuk HRD)");
+        System.out.println("3. Daftar Komunitas (untuk Mahasiswa)");
+        System.out.print("Masukkan pilihan: ");
+        int communityChoice = scanner.nextInt();
+        scanner.nextLine(); // Consume the newline
+
+        switch (communityChoice) {
+            case 1 -> {// Event Menu
+                System.out.println("Masuk ke menu Event:");
+
+                System.out.println("=======================================");
+                if (AppManager.currentUser == null) {
+                    System.out.println("Silahkan login terlebih dahulu");
+                    System.out.println("=======================================");
+                    break;
+                }
+                System.out.println("Selamat datang di menu tambah event");
+
+                System.out.println("=======Daftar Event yang Tersedia======");
+                if (AppManager.events.isEmpty()) {
+                    System.out.println("Tidak ada event yang tersedia.");
+                    System.out.println("=================================================");
+                } else {
+                    for (Event event : AppManager.events) {
+                        System.out.println("- " + event.getTitle() + ": " + event.getDescription());
+                    }
+                }
+                System.out.println("=======================================");
+                System.out.println("Pilih opsi:");
+                System.out.println("1. Tambah Event (untuk HRD)");
+                System.out.println("2. Enroll ke Event (untuk Mahasiswa)");
+                System.out.println("3. Kerjakan Quest (untuk Mahasiswa)");
+                System.out.println("4. Keluar menu Event");
+                System.out.print("Masukkan pilihan: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine();
+
+                switch (choice) {
+                    case 1 -> {
+                        System.out.println("=======================================");
+                        if (AppManager.currentUser == null) {
+                            System.out.println("Silahkan login terlebih dahulu");
+                            System.out.println("=======================================");
+                            break;
+                        }
+
+                        if (AppManager.currentUser.isHRD()) {
+                            System.out.print("Masukkan nama komunitas untuk event: ");
+                            String communityName = scanner.nextLine();
+                            Community selectedCommunity = AppManager.getCommunityByName(communityName);
+
+                            if (selectedCommunity != null) {
+                                System.out.print("Masukkan judul event: ");
+                                String eventTitle = scanner.nextLine();
+
+                                Event newEvent = new Event(eventTitle, selectedCommunity.getName());
+                                newEvent.setCreatorId(AppManager.currentUser.getId());
+
+                                System.out.print("Masukkan deskripsi event: ");
+                                String eventDescription = scanner.nextLine();
+                                newEvent.setDescription(eventDescription);
+
+                                while (true) {
+                                    System.out.print("Masukkan nama quest: ");
+                                    String title = scanner.nextLine();
+                                    System.out.print("Masukkan deskripsi quest: ");
+                                    String desc = scanner.nextLine();
+                                    Quest newQuest = new Quest(title, desc);
+                                    newEvent.addQuest(newQuest);
+                                    AppManager.addQuestToDatabase(newQuest);
+                                    System.out.print("Lanjut? [y/n]: ");
+                                    String n = scanner.nextLine();
+                                    if (n.equalsIgnoreCase("n")) {
+                                        break;
+                                    }
+                                }
+                                AppManager.storeEventToDatabase(newEvent);
+                                System.out.println("Event berhasil ditambahkan");
+                            } else {
+                                System.out.println("Komunitas tidak ditemukan.");
+                            }
+                        } else {
+                            System.out.println("Hanya HRD yang bisa menambahkan event");
+                        }
+                        System.out.println("=======================================");
+                    }
+                    case 2 -> {
+                        System.out.println("=======================================");
+                        if (AppManager.currentUser == null) {
+                            System.out.println("Silahkan login terlebih dahulu");
+                            System.out.println("=======================================");
+                            break;
+                        }
+
+                        if (AppManager.currentUser.isMahasiswa()) {
+                            System.out.print("Masukkan judul event yang ingin diikuti: ");
+                            String eventTitle = scanner.nextLine();
+
+                            Event selectedEvent = AppManager.getEventByName(eventTitle);
+                            if (selectedEvent != null) {
+                                if (!selectedEvent.getCommunity().hasMember(AppManager.currentUser)) {
+                                    System.out.println("Anda harus menjadi anggota komunitas untuk mengikuti event ini.");
+                                } else {
+                                    AppManager.addMahasiswaToEvent(AppManager.currentUser.getId(), selectedEvent);
+                                    System.out.println("Berhasil mendaftar untuk event: " + selectedEvent.getTitle());
+                                }
+                            } else {
+                                System.out.println("Event dengan judul tersebut tidak ditemukan.");
+                            }
+                        } else {
+                            System.out.println("Hanya mahasiswa yang bisa mendaftar ke event.");
+                        }
+                        System.out.println("=======================================");
+                    }
+                    case 3 -> {
+                        System.out.println("=======================================");
+                        if (AppManager.currentUser == null) {
+                            System.out.println("Silahkan login terlebih dahulu");
+                            System.out.println("=======================================");
+                            break;
+                        }
+
+                        if (!AppManager.currentUser.isMahasiswa()) {
+                            System.out.println("Hanya mahasiswa yang bisa mengerjakan quest.");
+                            System.out.println("=======================================");
+                            break;
+                        }
+
+                        System.out.println("Event yang diikuti oleh Anda:");
+                        boolean hasJoinedEvent = false;
+                        for (Event event : AppManager.events) {
+                            if (event.getMahasiswaIDs().contains(AppManager.currentUser.getId())) {
+                                hasJoinedEvent = true;
+                                System.out.println("- " + event.getTitle() + ": " + event.getDescription());
+
+
+                                System.out.println("  Daftar Quest dalam Event " + event.getTitle() + ":");
+                                if (event.getQuestIDs().isEmpty()) {
+                                    System.out.println("  Tidak ada quest dalam event ini.");
+                                } else {
+                                    for (int i = 0; i < event.getQuestIDs().size(); i++) {
+                                        String questID = event.getQuestIDs().get(i);
+
+
+                                        Quest quest = AppManager.getQuestById(questID);
+
+                                        if (quest != null) {
+                                            System.out.println("    " + (i + 1) + ". " + quest.getTitle() + ": " + quest.getDescription());
+                                        } else {
+                                            System.out.println("    " + (i + 1) + ". Quest with ID " + questID + " not found.");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!hasJoinedEvent) {
+                            System.out.println("Anda belum bergabung dengan event manapun.");
+                            System.out.println("=======================================");
+                            break;
+                        }
+
+
+                        System.out.print("Masukkan nomor quest yang ingin dikerjakan: ");
+                        int questIndex = scanner.nextInt();
+                        scanner.nextLine();
+
+                        boolean questFound = false;
+                        for (Event event : AppManager.events) {
+                            if (event.getMahasiswaIDs().contains(AppManager.currentUser.getId())) {
+
+                                if (questIndex >= 1 && questIndex <= event.getQuestIDs().size()) {
+                                    String questID = event.getQuestIDs().get(questIndex - 1);
+                                    Quest selectedQuest = AppManager.getQuestById(questID);
+
+                                    if (selectedQuest != null) {
+                                        questFound = true;
+
+
+                                        if (selectedQuest.isCompleted()) {
+                                            System.out.println("Quest '" + selectedQuest.getTitle() + "' sudah selesai dikerjakan.");
+                                        } else {
+                                            selectedQuest.setCompletion(true);
+                                            System.out.println("Quest '" + selectedQuest.getTitle() + "' dari event '" + event.getTitle() + "' berhasil diselesaikan!");
+
+                                            AppManager.updateQuestStatus(AppManager.currentUser, selectedQuest, event);
+                                        }
+                                    } else {
+                                        System.out.println("Quest dengan ID " + questID + " tidak ditemukan.");
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!questFound) {
+                            System.out.println("Nomor quest tidak valid atau Anda tidak terdaftar dalam event ini.");
+                        }
+
+                        System.out.println("=======================================");
+                    }
+                    default -> {
+                        System.out.println("Pilihan tidak valid.");
+                    }
+                }
+            }
+            case 2 -> {
+                if (AppManager.currentUser.isHRD()) {
+                    System.out.print("Masukkan nama komunitas: ");
+                    String communityName = scanner.nextLine();
+                    Community newCommunity = new Community(communityName, AppManager.currentUser);
+                    AppManager.communities.add(newCommunity);
+                    System.out.println("Komunitas berhasil dibuat!");
+                } else {
+                    System.out.println("Hanya HRD yang bisa membuat komunitas.");
+                }
+            }
+            case 3 -> {
+                System.out.println("Daftar komunitas yang tersedia:");
+                if (AppManager.communities.isEmpty()) {
+                    System.out.println("Tidak ada komunitas yang tersedia.");
+                } else {
+                    for (int i = 0; i < AppManager.communities.size(); i++) {
+                        Community community = AppManager.communities.get(i);
+                        System.out.println((i + 1) + ". " + community.getName() + " - Pemilik: " + community.getOwner().getName());
+                    }
+                    System.out.print("Masukkan nomor komunitas yang ingin Anda ikuti: ");
+                    int communityIndex = scanner.nextInt();
+                    scanner.nextLine();
+
+                    if (communityIndex >= 1 && communityIndex <= AppManager.communities.size()) {
+                        Community selectedCommunity = AppManager.communities.get(communityIndex - 1);
+                        if (!selectedCommunity.getMahasiswa().contains(AppManager.currentUser)) {
+                            selectedCommunity.addMahasiswa((Mahasiswa) AppManager.currentUser);
+                            System.out.println("Anda berhasil bergabung ke komunitas " + selectedCommunity.getName());
+                        } else {
+                            System.out.println("Anda sudah menjadi bagian dari komunitas ini.");
+                        }
+                    } else {
+                        System.out.println("Komunitas tidak ditemukan.");
+                    }
+                }
+            }
+        }
+
+    }
+
     public void run() {
         Scanner scanner = new Scanner(System.in);
-
-        Quest newQuestdummy = new Quest("questTitledummy", "questDescriptiondummy");
-        AppManager.quests.add(newQuestdummy);
-
-        // Dummy Achievement
-        List<String> tags = new ArrayList<>();
-        tags.add("Tag1");
-        tags.add("Tag2");
-        Achievement dummyAchievement = new Achievement("Dummy Achievement", tags);
-
-        // Dummy User
-//        User dummyUser = new User("Dummy Name", "dummyUsername", "HRD", "Dummy Company", "password123");
-//
-//        // Dummy Mahasiswa
-//        Mahasiswa dummyMahasiswa = new Mahasiswa("Dummy Mahasiswa", "dummyMahasiswaUsername", "Dummy University");
-//        dummyMahasiswa.addQuest(new Quest("Quest 1", "Description for Quest 1"));
-//
-//        // Dummy HRD
-//        HRD dummyHRD = new HRD("Dummy HRD", "dummyHRDUsername", "Dummy Company");
-//
-//        // Dummy Quest
-//        Quest dummyQuest = new Quest("Dummy Quest", "This is a dummy quest description.");
-//
-//        // Dummy Achievement
-//        List<String> tags = new ArrayList<>();
-//        tags.add("Tag1");
-//        tags.add("Tag2");
-//        Achievement dummyAchievement = new Achievement("Dummy Achievement", tags);
-//
-//        // Dummy Event
-//        Event dummyEvent = new Event("Dummy Event");
-//        dummyEvent.setDescription("This is a dummy event description.");
-//        dummyEvent.addQuest(dummyQuest);
-//        dummyEvent.addMahasiswa(dummyMahasiswa);
-//
-//        // Dummy Community
-//        Community dummyCommunity = new Community("Dummy Community", dummyUser);
-//        dummyCommunity.addMahasiswa(dummyMahasiswa);
-//        dummyCommunity.addQuest(dummyQuest);
-//
-//        // Dummy Chat
-//        Chat dummyChat = new Chat("Hello, this is a dummy chat!", null, dummyUser);
-//
-//        // Dummy EventChat
-//        EventChat dummyEventChat = new EventChat("Event Chat Message", null, dummyUser);
-//
-//        Quest[] newQuest1 = {new Quest("DPBO tests", "Quiz sub clo dpbo")};
-//
-//        dummyEventChat.setEvent(dummyEvent);
-
-        System.out.println("Application running");
 
         while (true) {
             int option = menu();
@@ -136,95 +349,10 @@ public class UnitTest {
                     }
                     System.out.println("=======================================");
                 }
-
                 case 4 -> {
-                    System.out.println("=======================================");
-                    if (AppManager.currentUser == null) {
-                        System.out.println("Silahkan login terlebih dahulu");
-                        System.out.println("=======================================");
-                        break;
-                    }
-                    System.out.println("Selamat datang di menu tambah event");
-
-                    System.out.println("=======Daftar Event yang Tersedia======");
-                    if (AppManager.events.isEmpty()) {
-                        System.out.println("Tidak ada event yang tersedia.");
-                        System.out.println("=================================================");
-                    } else {
-                        for (Event event : AppManager.events) {
-                            System.out.println("- " + event.getTitle() + ": " + event.getDescription());
-                        }
-                    }
-                    System.out.println("=======================================");
-                    System.out.println("Pilih opsi:");
-                    System.out.println("1. Tambah Event (untuk HRD)");
-                    System.out.println("2. Enroll ke Event (untuk Mahasiswa)");
-                    System.out.println("3. Kerjakan Quest (untuk Mahasiswa)");
-                    System.out.print("Masukkan pilihan: ");
-                    int choice = scanner.nextInt();
-                    scanner.nextLine();
-
-                    switch (choice) {
-                        case 1 -> {
-                            if (AppManager.currentUser.isHRD()) {
-                                System.out.print("Masukan judul event: ");
-                                String eventTitle = scanner.nextLine();
-
-                                Event newEvent = new Event(eventTitle);
-                                newEvent.setCreatorId(AppManager.currentUser.getId());
-
-                                System.out.print("Masukan deskripsi event: ");
-                                String eventDescription = scanner.nextLine();
-                                newEvent.setDescription(eventDescription);
-
-                                while (true) {
-                                    System.out.print("Masukkan nama quest: ");
-                                    String title = scanner.nextLine();
-                                    System.out.print("Masukkan deskripsi quest: ");
-                                    String desc = scanner.nextLine();
-                                    Quest newQuest = new Quest(title, desc);
-                                    newEvent.addQuest(newQuest);
-                                    AppManager.addQuestToDatabase(newQuest);
-                                    System.out.print("Lanjut? [y/n]: ");
-                                    String n = scanner.nextLine();
-                                    if (n.equalsIgnoreCase("n")) {
-                                        break;
-                                    }
-                                }
-                                AppManager.storeEventToDatabase(newEvent);
-                                System.out.println("Event berhasil ditambahkan");
-                            } else {
-                                System.out.println("Hanya HRD yang bisa menambahkan event");
-                            }
-                        }
-                        case 2 -> {
-                            if (AppManager.currentUser.isMahasiswa()) {
-                                System.out.print("Masukkan judul event yang ingin diikuti: ");
-                                String eventTitle = scanner.nextLine();
-
-                                Event selectedEvent = AppManager.getEventByName(eventTitle);
-                                if (selectedEvent != null) {
-                                    AppManager.addMahasiswaToEvent(AppManager.currentUser.getId(), selectedEvent);
-                                    System.out.println("Berhasil mendaftar untuk event: " + selectedEvent.getTitle());
-                                } else {
-                                    System.out.println("Event dengan judul tersebut tidak ditemukan.");
-                                }
-                            } else {
-                                System.out.println("Hanya mahasiswa yang bisa mendaftar ke event.");
-                            }
-                        }
-                        case 3 -> {
-                            System.out.println("ini adalah case 4-3");
-                        }
-                        default -> {
-                            System.out.println("Pilihan tidak valid.");
-                        }
-                    }
-
-
-
-                    System.out.println("=======================================");
+                   communityMenu(scanner);
                 }
+
                 case 5 -> {
                     if (AppManager.currentUser == null) {
                         System.out.println("Silakan login terlebih dahulu untuk melihat data pengguna.");
@@ -356,13 +484,13 @@ public class UnitTest {
         Scanner scanner = new Scanner(System.in);
         int choice = 1;
         while (true) {
-            System.out.println("____Conectify____");
+            System.out.println("------ Conectify ------");
             System.out.println("1. Register");
             System.out.println("2. Login");
             System.out.println("3. Tambah Quest");
             System.out.println("4. Menu Event");
             System.out.println("5. Tampilkan User Data");
-            System.out.println("6. Tampilkan Community Menu");
+            System.out.println("6. Tampilkan Community Data");
             System.out.println("7. Tampilkan Quest Data");
             System.out.println("8. Tampilkan Event Data");
             System.out.println("9. Keluar");

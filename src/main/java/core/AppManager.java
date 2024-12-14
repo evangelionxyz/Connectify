@@ -50,9 +50,9 @@ public class AppManager {
         }
     }
 
-    // ===========================
-    // !TEST
-
+    /// ------------------------------------
+    /// User section
+    /// ------------------------------------
     public static boolean registerUser(User user) {
         try {
             Map<String, Object> userData = user.getStringObjectMap();
@@ -145,6 +145,10 @@ public class AppManager {
         }
     }
 
+    /// ------------------------------------
+    /// Chat section
+    /// ------------------------------------
+
     public static Chat getChatById(String chatId) {
         try {
             QuerySnapshot q = getQueryByFieldValue("chats", "id", chatId);
@@ -195,6 +199,7 @@ public class AppManager {
     /// ------------------------------------
     /// Event section
     /// ------------------------------------
+
     private static void eventStartListening() {
         firestore.collection("events").addSnapshotListener((snapshot, error) -> {
             if (error != null) {
@@ -353,23 +358,21 @@ public class AppManager {
     public static Quest getQuestByName(String questName) {
         try {
             QuerySnapshot q = getQueryByFieldValue("quests", "title", questName);
-            if (q.isEmpty()) {
-                throw new RuntimeException("Quest with name " + questName + " not found.");
-            }
-            QueryDocumentSnapshot doc = q.getDocuments().get(0);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
             String id = doc.getString("id");
             String title = doc.getString("title");
             String description = doc.getString("description");
             boolean isCompleted = doc.getBoolean("isCompleted");
-
             Quest quest = new Quest(title, description);
             quest.setId(id);
+
             if (isCompleted) {
-                quest.doQuest(); // Mark as completed if already done in DB
+                quest.doQuest();
             }
             return quest;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.err.println(e.getMessage());
+            return null;
         }
     }
 
