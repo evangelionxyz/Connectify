@@ -222,36 +222,7 @@ public class UnitTest {
                     }
 
 
-                    /*System.out.print("Apakah Anda ingin menyelesaikan quest di event ini? (ya/tidak): ");
-                    String jawab = scanner.nextLine();
 
-                    if (jawab.equalsIgnoreCase("ya")) {
-                        System.out.print("Masukan Id event: ");
-                        String eventName = scanner.nextLine();
-                        Event event = AppManager.getEventByName(eventName);
-
-                        if (event != null) {
-                            List<String> questIds = event.getQuestIDs();
-                            boolean allQuestCompleted = true;
-
-                            for (String questName : questIds) {
-                                Quest quest = AppManager.getQuestByName(questName);
-                                if (quest != null && !quest.isCompleted()) {
-                                    quest.doQuest();
-                                    System.out.println("Quest " + quest.getTitle() + " selesai");
-                                } else if (quest == null || quest.isCompleted()) {
-                                    allQuestCompleted = false;
-                                }
-                            }
-
-                            if (allQuestCompleted) {
-                                tags.add("CompletedAllQuests");
-                                tags.add("RewardUnlocked");
-
-                                AppManager.addAchievement("achievement-1", tags);
-                            }
-                        }
-                    }*/
                     System.out.println("=======================================");
                 }
                 case 5 -> {
@@ -391,7 +362,7 @@ public class UnitTest {
             System.out.println("3. Tambah Quest");
             System.out.println("4. Menu Event");
             System.out.println("5. Tampilkan User Data");
-            System.out.println("6. Tampilkan Community Data");
+            System.out.println("6. Tampilkan Community Menu");
             System.out.println("7. Tampilkan Quest Data");
             System.out.println("8. Tampilkan Event Data");
             System.out.println("9. Keluar");
