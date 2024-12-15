@@ -12,7 +12,7 @@ public class EventTest {
         Mahasiswa pemilik = new Mahasiswa("evan", "evan", "telu");
         Community community = new Community("Offsider", pemilik);
 
-        Event hackathon = new Event("Hackathon 2024");
+        Event hackathon = new Event("Hackathon 2024", "GDSC");
 
         Mahasiswa syahdan = new Mahasiswa("syahdan", "syahdan", "telu");
         Mahasiswa yudha = new Mahasiswa("yuda", "yuda", "telu");
