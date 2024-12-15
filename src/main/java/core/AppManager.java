@@ -30,8 +30,8 @@ public class AppManager {
     public static void initializeFirebase() throws IOException {
         FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");
         GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-        FirebaseOptions options = new FirebaseOptions.Builder()
-                .setCredentials(credentials).build();
+        FirebaseOptions options = FirebaseOptions.builder().setCredentials(credentials).build();
+
         firebaseApp = FirebaseApp.initializeApp(options);
         firestore = FirestoreClient.getFirestore(firebaseApp);
 
@@ -44,7 +44,7 @@ public class AppManager {
         try {
             DocumentReference docRef = firestore.collection(path).document(id);
             ApiFuture<WriteResult> result = docRef.delete();
-            WriteResult writeResult = result.get();
+            result.get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -62,7 +62,7 @@ public class AppManager {
             // write to firestore
             ApiFuture<WriteResult> result = docRef.set(userData);
             // wait for write
-            WriteResult writeResult = result.get();
+            result.get();
             return true;
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to register user to firestore: "+e.getMessage());
@@ -173,7 +173,7 @@ public class AppManager {
             DocumentReference docRef = firestore.collection("chats").document(chat.getId());
             ApiFuture<WriteResult> result = docRef.set(chatData);
             // wait for write to complete
-            WriteResult writeResult = result.get();
+            result.get();
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to send message: "+e.getMessage());
         }
@@ -296,7 +296,7 @@ public class AppManager {
             Map<String, Object> comData = event.getStringObjectMap();
             DocumentReference docRef = firestore.collection("events").document(event.getId());
             ApiFuture<WriteResult> result = docRef.set(comData);
-            WriteResult writeResult = result.get();
+            result.get();
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to create event");
             throw new RuntimeException();
@@ -329,7 +329,7 @@ public class AppManager {
             Map<String, Object> comData = quest.getStringObjectMap();
             DocumentReference docRef = firestore.collection("quests").document(quest.getId());
             ApiFuture<WriteResult> result = docRef.set(comData);
-            WriteResult writeResult = result.get();
+            result.get();
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to create quest");
             throw new RuntimeException();
@@ -421,7 +421,7 @@ public class AppManager {
             Map<String, Object> comData = community.getStringObjectMap();
             DocumentReference docRef = firestore.collection("communities").document(community.getId());
             ApiFuture<WriteResult> result = docRef.set(comData);
-            WriteResult writeResult = result.get();
+            result.get();
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to create community");
             throw new RuntimeException();
