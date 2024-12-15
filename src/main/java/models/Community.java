@@ -1,5 +1,6 @@
 package models;
 
+import core.AppManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -9,6 +10,7 @@ public class Community extends ModelBase {
     private List<Mahasiswa> listMahasiswa;
     private List<Quest> listQuest;
     private List<Chat> listChat;
+    private List<Event> events;
     private User owner;
 
     public Community(String name, User owner) {
@@ -17,6 +19,7 @@ public class Community extends ModelBase {
         this.listMahasiswa = new ArrayList<>();
         this.listQuest = new ArrayList<>();
         this.listChat = new ArrayList<>();
+        this.events = new ArrayList<>();
         this.owner = owner;
     }
 
@@ -26,7 +29,17 @@ public class Community extends ModelBase {
         this.listMahasiswa = new ArrayList<>();
         this.listQuest = new ArrayList<>();
         this.listChat = new ArrayList<>();
+        this.events = new ArrayList<>();
         this.owner = owner;
+    }
+
+    public void addEvent(Event event) {
+        events.add(event);
+    }
+
+
+    public List<Event> getEvents() {
+        return events;
     }
 
     public void setOwner(User owner) {
@@ -123,6 +136,8 @@ public class Community extends ModelBase {
         return mhsIds;
     }
 
+
+
     @NotNull
     public Map<String, Object> getStringObjectMap() {
         Map<String, Object> comData = new HashMap<>();
@@ -139,6 +154,8 @@ public class Community extends ModelBase {
 
         return comData;
     }
+
+
 
     @Override
     public String toString() {

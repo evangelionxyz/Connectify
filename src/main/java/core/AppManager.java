@@ -272,7 +272,7 @@ public class AppManager {
         String id = doc.getString("id");
         String title = doc.getString("title");
 
-        Event event = new Event(title);
+        Event event = new Event(title, description);
         event.setCreatorId(creatorId);
         event.setDescription(description);
         event.setId(id);
@@ -310,7 +310,7 @@ public class AppManager {
             String id = doc.getString("id");
             String title = doc.getString("title");
             String description = doc.getString("description");
-            Event event = new Event(title);
+            Event event = new Event(title, description);
             event.setId(id);
             event.setCreatorId(doc.getString("creatorId"));
             event.setDescription(description);
@@ -447,6 +447,50 @@ public class AppManager {
         com.setId(id);
         return com;
     }
+
+    public static Community getCommunityByName(String communityName) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("Community", "name", communityName);
+            if (q.isEmpty()) {
+                throw new RuntimeException("Community dengan nama " + communityName + " tidak ditemukan");
+            }
+
+            QueryDocumentSnapshot doc = q.getDocuments().get(0);
+            String id = doc.getString("id");
+            String name = doc.getString("name");
+            String ownerId = doc.getString("ownerID");
+            List<String> mahasiswaIds = (List<String>) doc.get("mahasiswaIDs");
+            List<String> questIds = (List<String>) doc.get("questIDs");
+            List<String> chatIds = (List<String>) doc.get("chatIDs");
+
+            User owner = new User(ownerId);
+            Community community = new Community(name, owner, id);
+
+            if (mahasiswaIds != null) {
+                for (String mhsId : mahasiswaIds) {
+                    community.addMahasiswa(new Mahasiswa(mhsId));
+                }
+            }
+
+            if (questIds != null) {
+                for (String qId : questIds) {
+                    community.addQuest(new Quest(qId));
+                }
+            }
+
+            if (chatIds != null) {
+                for (String cId : chatIds) {
+                    community.addChat(new Chat(cId));
+                }
+            }
+
+            return community;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch community: " + e.getMessage(), e);
+        }
+    }
+
+
 
     private static void communityUpdateLocal(Community community, DocumentSnapshot doc) {
         String name = doc.getString("name");

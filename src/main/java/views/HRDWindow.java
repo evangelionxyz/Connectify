@@ -26,7 +26,7 @@ public class HRDWindow extends WindowBase {
 
         Runnable create = () -> {
             if (eventTitle.isNotEmpty()) {
-                Event newEvent = new Event(eventTitle.get());
+                Event newEvent = new Event(eventTitle.get(), eventContextOpen.getCommunity());
                 newEvent.setCreatorId(AppManager.currentUser.getId());
                 newEvent.setDescription(eventDesc.get());
                 AppManager.storeEventToDatabase(newEvent);
