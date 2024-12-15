@@ -196,41 +196,6 @@ public class UnitTest {
                         AppManager.selectedEvent = AppManager.getEventByTitle(eventName);
                         Quest selectedQuest = AppManager.getQuestByName(questName);
 
-                        if (AppManager.selectedEvent != null && selectedQuest != null) {
-
-                        }
-
-                        System.out.print("Masukkan nama quest yang ingin dikerjakan: ");
-                        String questName = scanner.nextLine();
-
-                        boolean questFound = false;
-                        for (Event event : AppManager.events) {
-                            if (event.getMahasiswaIds().contains(AppManager.currentUser.getId())) {
-                                if (questIndex >= 1 && questIndex <= event.getQuestIDs().size()) {
-                                    String questID = event.getQuestIDs().get(questIndex - 1);
-                                    Quest selectedQuest = AppManager.getQuestById(questID);
-                                    if (selectedQuest != null) {
-                                        questFound = true;
-                                        if (selectedQuest.isCompleted()) {
-                                            System.out.println("Quest '" + selectedQuest.getTitle() + "' sudah selesai dikerjakan.");
-                                        } else {
-                                            selectedQuest.setCompletion(true);
-                                            System.out.println("Quest '" + selectedQuest.getTitle() + "' dari event '" + event.getTitle() + "' berhasil diselesaikan!");
-
-                                            AppManager.updateQuestStatus(AppManager.currentUser, selectedQuest, event);
-                                        }
-                                    } else {
-                                        System.out.println("Quest dengan ID " + questID + " tidak ditemukan.");
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!questFound) {
-                            System.out.println("Nomor quest tidak valid atau Anda tidak terdaftar dalam event ini.");
-                        }
-
                         System.out.println("=======================================");
                     }
                     default -> {
@@ -348,7 +313,7 @@ public class UnitTest {
                         String eventTitle = scanner.nextLine();
 
                         Event selectedEvent = AppManager.getEventByTitle(eventTitle);
-                        
+
                         if (selectedEvent != null) {
                             System.out.print("Masukan judul Quest: ");
                             String questTitle = scanner.nextLine();
@@ -426,36 +391,6 @@ public class UnitTest {
                     if (AppManager.currentUser == null) {
                         System.out.println("Silahkan login terlebih dahulu");
                         System.out.println("=======================================");
-                    }
-
-                    System.out.println("Daftar Quest:");
-                    if (AppManager.quests.isEmpty()) {
-                        System.out.println("Belum ada quest yang ditambahkan.");
-                    } else {
-                        for (int i = 0; i < AppManager.quests.size(); i++) {
-                            Quest quest = AppManager.quests.get(i);
-                            System.out.println((i + 1) + ". " + quest.getTitle() + ": " + quest.getDescription() +
-                                    " | Status: " + (quest.isCompleted() ? "Selesai" : "Belum Selesai"));
-                        }
-
-                        System.out.print("Masukkan nomor quest yang ingin dikerjakan: ");
-                        int questIndex = scanner.nextInt();
-                        scanner.nextLine();
-
-                        if (questIndex >= 1 && questIndex <= AppManager.quests.size()) {
-                            Quest selectedQuest = AppManager.quests.get(questIndex - 1);
-                            if (selectedQuest.isCompleted()) {
-                                System.out.println("Quest ini sudah selesai dikerjakan.");
-                            } else {
-                                selectedQuest.doQuest();
-                                System.out.println("Quest '" + selectedQuest.getTitle() + "' berhasil diselesaikan!");
-
-                                AppManager.quests.remove(selectedQuest);
-                                System.out.println("Quest '" + selectedQuest.getTitle() + "' telah dihapus dari daftar.");
-                            }
-                        } else {
-                            System.out.println("Nomor quest tidak valid.");
-                        }
                     }
                     System.out.println("=======================================");
                 }

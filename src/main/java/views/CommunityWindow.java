@@ -37,6 +37,7 @@ public class CommunityWindow extends WindowBase {
         Runnable create = () -> {
             if (nameInput.isNotEmpty()) {
                 Community com = new Community(nameInput.get(), AppManager.currentUser.getId());
+                nameInput.clear();
                 AppManager.storeCommunityToDatabase(com);
             }
         };
@@ -224,11 +225,8 @@ public class CommunityWindow extends WindowBase {
                     }
                 }
             }
-
         }
-
-        ImGui.text(c.getTimestamp().toString());
-
+        ImGui.text(c.getTimestamp().toDate().toString());
         ImGui.separator();
     }
 }
