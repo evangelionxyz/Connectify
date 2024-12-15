@@ -5,7 +5,7 @@ import models.*;
 public class HRDTest {
     public static void main(String[] args) {
         User user1 = new User("pratono","pyr", "Owner", "PT Teknologi Maju");
-        Community community = new Community("PT Teknologi maju",user1, "1020103");
+        Community community = new Community("PT Teknologi maju", user1.getId(), "1020103");
 
         HRD hrd = new HRD("Syahdan", "Hexx", "PT Teknologi Maju");
 

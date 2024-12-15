@@ -16,15 +16,6 @@ public class QuestTest {
         if (input.equals("iya")) {
             System.out.println("Sedang mengerjakan quest...");
             System.out.print("Sudah selesai dikerjakan? (iya/tidak): ");
-
-            input = scanner.next();
-
-            if (input.equals("iya")) {
-                System.out.println("Kamu hebat, Quest telah selesai");
-                quest1.doQuest();
-            } else {
-                System.out.println("Quest Belum Selesai");
-            }
         } else {
             System.out.println("Quest Belum Dikerjakan");
         }

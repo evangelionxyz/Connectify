@@ -1,53 +1,76 @@
 package models;
 
-import core.AppManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class Community extends ModelBase {
     private String name;
-    private List<Mahasiswa> listMahasiswa;
-    private List<Quest> listQuest;
-    private List<Chat> listChat;
-    private List<Event> events;
-    private User owner;
+    private List<Mahasiswa> mahasiswa;
+    private List<Chat> chats;
+    private final List<Event> events;
 
-    public Community(String name, User owner) {
+    private final List<String> mahasiswaIds;
+    private final List<String> chatIds;
+    private final List<String> eventIds;
+
+    private String ownerId;
+
+    public Community(String name, String ownerId) {
         super();
         this.name = name;
-        this.listMahasiswa = new ArrayList<>();
-        this.listQuest = new ArrayList<>();
-        this.listChat = new ArrayList<>();
+        this.mahasiswa = new ArrayList<>();
+        this.chats = new ArrayList<>();
         this.events = new ArrayList<>();
-        this.owner = owner;
+
+        this.mahasiswaIds = new ArrayList<>();
+        this.chatIds = new ArrayList<>();
+        this.eventIds = new ArrayList<>();
+
+        this.ownerId = ownerId;
     }
 
-    public Community(String name, User owner, String id) {
+    public Community(String name, String ownerId, String id) {
         super(id);
         this.name = name;
-        this.listMahasiswa = new ArrayList<>();
-        this.listQuest = new ArrayList<>();
-        this.listChat = new ArrayList<>();
+        this.mahasiswa = new ArrayList<>();
+        this.chats = new ArrayList<>();
         this.events = new ArrayList<>();
-        this.owner = owner;
+
+        this.mahasiswaIds = new ArrayList<>();
+        this.chatIds = new ArrayList<>();
+        this.eventIds = new ArrayList<>();
+
+        this.ownerId = ownerId;
     }
 
     public void addEvent(Event event) {
         events.add(event);
+        eventIds.add(event.id);
     }
 
+    // remove by id
+    public void removeEvent(String eventId) {
+        if (events.removeIf((event -> event.id.equals(eventId)))) {
+            eventIds.removeIf(id -> id.equals(eventId));
+        }
+    }
+
+    public void removeEvent(Event event) {
+        events.remove(event);
+        eventIds.removeIf(id -> id.equals(event.id));
+    }
 
     public List<Event> getEvents() {
         return events;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
     }
 
-    public User getOwner() {
-        return owner;
+    public String getOwnerId() {
+        return ownerId;
     }
 
     public String getName() {
@@ -58,104 +81,71 @@ public class Community extends ModelBase {
         this.name = name;
     }
 
-    public void setMahasiswa(ArrayList<Mahasiswa> mhs) {
-        this.listMahasiswa = mhs;
+    public void setMahasiswa(List<Mahasiswa> mhs) {
+        mahasiswa = mhs;
+        mahasiswa.forEach(x -> {
+            mahasiswaIds.add(x.id);
+        });
     }
 
-    public void setChats(ArrayList<Chat> chats) {
-        this.listChat = chats;
-    }
-
-    public void setQuests(ArrayList<Quest> quests) {
-        this.listQuest = quests;
+    public void setChats(List<Chat> chats) {
+        this.chats = chats;
     }
 
     public void addMahasiswa(Mahasiswa mhs) {
-        if (!listMahasiswa.contains(mhs)) {
-            listMahasiswa.add(mhs);
+        if (!mahasiswa.contains(mhs)) {
+            mahasiswa.add(mhs);
+            mahasiswaIds.add(mhs.id);
         }
-    }
-
-    public void addChat(Chat chat) {
-        listChat.add(chat);
-    }
-
-    public boolean isMahasiswaExists(String id){
-        for (Mahasiswa mhs : listMahasiswa) {
-            if (Objects.equals(mhs.getId(), id)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void addQuest(Quest quest) {
-        listQuest.add(quest);
-    }
-
-    public void setQuestToMahasiswa(Mahasiswa mhs, Quest quest) {
-        if (isMahasiswaExists(mhs.getId())) {
-            mhs.addQuest(quest);
-        }
-        System.out.println("Mahasiswa dengan NIM:" + mhs.getId() + "tidak ditemukan");
     }
 
     public final List<Mahasiswa> getMahasiswa() {
-        return listMahasiswa;
+        return mahasiswa;
     }
 
-    public final List<Quest> getQuests() {
-        return listQuest;
+    public void addChat(Chat chat) {
+        chats.add(chat);
+        chatIds.add(chat.getId());
     }
+
+    public void removeChat(String chatId) {
+        if (chats.removeIf(chat -> chat.id.equals(chatId))) {
+            chatIds.remove(chatId);
+        }
+    }
+
+   public void removeChat(Chat chat) {
+        chats.remove(chat);
+        chatIds.removeIf(id -> id.equals(chat.id));
+   }
 
     public final List<Chat> getChats() {
-        return listChat;
+        return chats;
     }
 
-    public List<String> getQuestIDs() {
-        ArrayList<String> questIds = new ArrayList<>();
-        listQuest.forEach(x -> {
-            questIds.add(x.getId());
-        });
-        return questIds;
-    }
-
-    public List<String> getChatIDs() {
-        ArrayList<String> chatIds = new ArrayList<>();
-        listChat.forEach(x -> {
-            chatIds.add(x.getId());
-        });
+    public List<String> getChatIds() {
         return chatIds;
     }
 
-    public List<String> getMahasiswaIDs() {
-        ArrayList<String> mhsIds = new ArrayList<>();
-        listMahasiswa.forEach(x -> {
-            mhsIds.add(x.getId());
-        });
-        return mhsIds;
+    public List<String> getMahasiswaIds() {
+        return mahasiswaIds;
     }
 
-
+    public List<String> getEventIds() {
+        return eventIds;
+    }
 
     @NotNull
     public Map<String, Object> getStringObjectMap() {
         Map<String, Object> comData = new HashMap<>();
         comData.put("name", name);
         comData.put("id", id);
-
-        if (owner != null) {
-            comData.put("ownerID", owner.getId());
-        }
-
-        comData.put("mahasiswaIDs", getMahasiswaIDs());
-        comData.put("questIDs", getQuestIDs());
-        comData.put("chatIDs", getChatIDs());
-
+        comData.put("ownerID", ownerId);
+        comData.put("mahasiswaIDs", mahasiswaIds);
+        comData.put("eventIDs", eventIds);
+        comData.put("chatIDs", chatIds);
         return comData;
     }
-
-
 
     @Override
     public String toString() {

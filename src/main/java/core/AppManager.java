@@ -22,10 +22,10 @@ public class AppManager {
     public static User currentUser = null;
     public static Community selectedCommunity = null;
     public static Event selectedEvent = null;
-    public static List<Community> communities = new ArrayList<>();
+
     public static List<Event> events = new ArrayList<>();
+    public static List<Community> communities = new ArrayList<>();
     public static ArrayList<String> eventTitles = new ArrayList<>();
-    public static List<Quest> quests = new ArrayList<>();
 
     public static void initializeFirebase() throws IOException {
         FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");
@@ -50,26 +50,6 @@ public class AppManager {
         }
     }
 
-    /// ------------------------------------
-    /// User section
-    /// ------------------------------------
-    public static boolean registerUser(User user) {
-        try {
-            Map<String, Object> userData = user.getStringObjectMap();
-
-            // get collection's document user -> document by id
-            DocumentReference docRef = firestore.collection("users").document(user.getId());
-            // write to firestore
-            ApiFuture<WriteResult> result = docRef.set(userData);
-            // wait for write
-            result.get();
-            return true;
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to register user to firestore: "+e.getMessage());
-            throw new RuntimeException();
-        }
-    }
-
     public static QuerySnapshot getQueryByFieldValue(String path, String fieldName, String value) {
         try {
             ApiFuture<QuerySnapshot> query = firestore.collection(path).whereEqualTo(fieldName, value).get();
@@ -79,14 +59,47 @@ public class AppManager {
         }
     }
 
+    /// ------------------------------------
+    /// User section
+    /// ------------------------------------
+
+    public static User createUserFromDoc(QueryDocumentSnapshot doc) {
+        try {
+            String displayName = doc.getString("displayname");
+            String username = doc.getString("username");
+            String type = doc.getString("type");
+            String company = doc.getString("company");
+            String encryptedPassword = doc.getString("password");
+            String userId = doc.getString("id");
+            assert encryptedPassword != null;
+            String password = EncryptionUtils.decrypt(encryptedPassword, EncryptionUtils.getGlobalSecretKey());
+            User user = new User(displayName, username, type, company, password);
+            user.setId(userId);
+            return user;
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static boolean registerUser(User user) {
+        try {
+            Map<String, Object> userData = user.getStringObjectMap();
+            DocumentReference docRef = firestore.collection("users").document(user.getId());
+            ApiFuture<WriteResult> result = docRef.set(userData);
+            result.get();
+            return true;
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to register user to firestore: "+e.getMessage());
+            throw new RuntimeException();
+        }
+    }
+
     public static User loginUser(String username, String password) {
         try {
             QuerySnapshot q = getQueryByFieldValue("users", "username", username);
             QueryDocumentSnapshot doc = q.getDocuments().getFirst();
-
-            // retrieve encrypted password from Firestore
             String encryptedPasswordStored = doc.getString("password");
-            // encrypt the input password for comparison
             String encryptedPasswordInput = EncryptionUtils.encrypt(password, EncryptionUtils.getGlobalSecretKey());
             assert encryptedPasswordStored != null;
             if (encryptedPasswordStored.equals(encryptedPasswordInput)) {
@@ -110,18 +123,9 @@ public class AppManager {
         try {
             QuerySnapshot q = getQueryByFieldValue("users", "username", username);
             QueryDocumentSnapshot doc = q.getDocuments().getFirst();
-
-            String displayName = doc.getString("displayname");
-            String type = doc.getString("type");
-            String company = doc.getString("company");
-            String encryptedPassword = doc.getString("password");
-            String userId = doc.getString("id");
-            assert encryptedPassword != null;
-            String password = EncryptionUtils.decrypt(encryptedPassword, EncryptionUtils.getGlobalSecretKey());
-            User user = new User(displayName, username, type, company, password);
-            user.setId(userId);
-            return user;
+            return createUserFromDoc(doc);
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             return null;
         }
     }
@@ -130,17 +134,9 @@ public class AppManager {
         try {
             QuerySnapshot q = getQueryByFieldValue("users", "id", userId);
             QueryDocumentSnapshot doc = q.getDocuments().getFirst();
-            String username = doc.getString("username");
-            String displayName = doc.getString("displayname");
-            String type = doc.getString("type");
-            String company = doc.getString("company");
-            String encryptedPassword = doc.getString("password");
-            assert encryptedPassword != null;
-            String password = EncryptionUtils.decrypt(encryptedPassword, EncryptionUtils.getGlobalSecretKey());
-            User user = new User(displayName, username, type, company, password);
-            user.setId(userId);
-            return user;
+            return createUserFromDoc(doc);
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             return null;
         }
     }
@@ -149,17 +145,24 @@ public class AppManager {
     /// Chat section
     /// ------------------------------------
 
-    public static Chat getChatById(String chatId) {
+    public static Chat createChatFromDoc(QueryDocumentSnapshot doc) {
         try {
-            QuerySnapshot q = getQueryByFieldValue("chats", "id", chatId);
-            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+            String id = doc.getString("id");
             String message = doc.getString("message");
             String senderId = doc.getString("sender");
             User sender = getUserById(senderId);
             Timestamp timestamp = doc.getTimestamp("timestamp");
-            Chat chat = new Chat(message, timestamp, sender);
-            chat.setId(chatId);
-            return chat;
+            return new Chat(message, timestamp, sender, id);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+    public static Chat getChatById(String chatId) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("chats", "id", chatId);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+            return createChatFromDoc(doc);
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to get chat by id: "+chatId);
             return null;
@@ -169,36 +172,62 @@ public class AppManager {
     public static void storeChatToDatabase(Chat chat) {
         try {
             Map<String, Object> chatData = chat.getStringObjectMap();
-            // chats -> chat id
             DocumentReference docRef = firestore.collection("chats").document(chat.getId());
             ApiFuture<WriteResult> result = docRef.set(chatData);
-            // wait for write to complete
             result.get();
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to send message: "+e.getMessage());
         }
     }
 
-    public static void addChatToCommunity(Community community, Chat chat) {
-        try {
-            storeChatToDatabase(chat);
-            community.addChat(chat);
-
-            Map<String, Object> updateData = new HashMap<>();
-            updateData.put("chatIDs", community.getChatIDs());
-
-            firestore.collection("communities")
-                    .document(community.getId())
-                    .update(updateData);
-
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to add chat to community");
-        }
-    }
-
     /// ------------------------------------
     /// Event section
     /// ------------------------------------
+
+    private static Event createEventFromDoc(DocumentSnapshot doc) {
+        String creatorId = doc.getString("creatorId");
+        String description = doc.getString("description");
+        String id = doc.getString("id");
+        String title = doc.getString("title");
+
+        Event event = new Event(title, description, id);
+        event.setCreatorId(creatorId);
+
+        // load mahasiswa
+        List<String> mhsIds = (List<String>)doc.get("mahasiswaIds");
+        assert mhsIds != null;
+
+        mhsIds.forEach(mhsId -> {
+            Mahasiswa mhs = (Mahasiswa) getUserById(mhsId);
+            if (mhs != null) {
+                event.addMahasiswa(mhs);
+            }
+        });
+
+        // load quests
+        List<String> questIds = (List<String>)doc.get("questsIds");
+        assert questIds != null;
+
+        questIds.forEach(questId -> {
+            Quest quest = getQuestById(questId);
+            if (quest != null) {
+                event.addQuest(quest);
+            }
+        });
+
+        // load communities
+        List<String> communityIds = (List<String>)doc.get("communityIds");
+        assert communityIds != null;
+
+        communityIds.forEach(comId -> {
+            Community com = getCommunityById(comId);
+            if (com != null) {
+                event.addCommunity(com);
+            }
+        });
+
+        return event;
+    }
 
     private static void eventStartListening() {
         firestore.collection("events").addSnapshotListener((snapshot, error) -> {
@@ -219,13 +248,22 @@ public class AppManager {
                     // handle based on the type of change
                     switch (change.getType()) {
                         case ADDED -> {
-                            Event event = eventCreateFromDocument(change.getDocument());
+                            Event event = createEventFromDoc(change.getDocument());
                             events.add(event);
                             eventTitles.add(event.getTitle());
                         }
                         case MODIFIED -> {
                             if (localEvent != null) {
-                                eventUpdateLocal(localEvent, change.getDocument());
+                                try {
+                                    CollectionReference ref = firestore.collection("events");
+                                    DocumentReference docRef = ref.document(localEvent.getId());
+                                    docRef.update("title", localEvent.getTitle());
+                                    docRef.update("description", localEvent.getDescription());
+                                    docRef.update("mahasiswaIds", localEvent.getMahasiswaIds());
+                                    docRef.update("communityIds", localEvent.getCommunityIds());
+                                } catch (Exception e) {
+                                    System.err.println("[ERROR] Failed to update event: "+e.getMessage());
+                                }
                             }
                         }
                         case REMOVED -> {
@@ -239,24 +277,31 @@ public class AppManager {
         });
     }
 
-    public static void updateEvent(Event event) {
+    public static void storeQuestToEvent(Quest quest, Event event) {
         try {
-            CollectionReference ref = firestore.collection("events");
-            DocumentReference docRef = ref.document(event.getId());
+            storeQuestToDatabase(quest);
+            event.addQuest(quest);
 
-            docRef.update("title", event.getTitle());
-            docRef.update("description", event.getDescription());
-            docRef.update("mahasiswaIds", event.getMahasiswaIDs());
+            Map<String, Object> updateData = new HashMap<>();
+            updateData.put("questIds", event.getQuestIDs());
+
+            firestore.collection("events")
+                    .document()
+                    .update(updateData);
+
         } catch (Exception e) {
-            System.err.println("[ERROR] Failed to update event: "+e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
-    public static void addMahasiswaToEvent(String mhsId, Event event) {
+    public static void storeMahasiswaToEvent(Mahasiswa mhs, Event event) {
         try {
-            event.addMahasiswa(mhsId);
+            // add quests first
+            event.getQuests().forEach(mhs::addQuest);
+            event.addMahasiswa(mhs);
+
             Map<String, Object> updateData = new HashMap<>();
-            updateData.put("mahasiswaIds", event.getMahasiswaIDs());
+            updateData.put("mahasiswaIds", event.getMahasiswaIds());
 
             firestore.collection("events")
                     .document(event.getId())
@@ -264,31 +309,6 @@ public class AppManager {
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to add mahasiswa to event!");
         }
-    }
-
-    private static Event eventCreateFromDocument(DocumentSnapshot doc) {
-        String creatorId = doc.getString("creatorId");
-        String description = doc.getString("description");
-        String id = doc.getString("id");
-        String title = doc.getString("title");
-
-        Event event = new Event(title, description);
-        event.setCreatorId(creatorId);
-        event.setDescription(description);
-        event.setId(id);
-
-        ArrayList<String> ids = (ArrayList<String>)doc.get("mahasiswaIds");
-        event.setMahasiswaIds(ids);
-        event.setQuestsIds((List<String>) doc.get("questsIds"));
-        event.setCommunityIds((List<String>) doc.get("communityIds"));
-
-        return event;
-    }
-
-    private static void eventUpdateLocal(Event event, DocumentSnapshot doc) {
-        event.setTitle(doc.getString("title"));
-        event.setDescription(doc.getString("description"));
-        event.setMahasiswaIds((List<String>)doc.get("mahasiswaIds"));
     }
 
     public static void storeEventToDatabase(Event event) {
@@ -303,28 +323,113 @@ public class AppManager {
         }
     }
 
-    public static Event getEventByName(String eventName) {
+    public static Event getEventByTitle(String eventTitle) {
         try {
-            QuerySnapshot q = getQueryByFieldValue("events", "title", eventName);
+            QuerySnapshot q = getQueryByFieldValue("events", "title", eventTitle);
             QueryDocumentSnapshot doc = q.getDocuments().getFirst();
-            String id = doc.getString("id");
-            String title = doc.getString("title");
-            String description = doc.getString("description");
-            Event event = new Event(title, description);
-            event.setId(id);
-            event.setCreatorId(doc.getString("creatorId"));
-            event.setDescription(description);
-            event.setMahasiswaIds((List<String>) doc.get("mahasiswaIds"));
-            event.setQuestsIds((List<String>) doc.get("questsIds"));
-            event.setCommunityIds((List<String>) doc.get("communityIds"));
-            return event;
+            return createEventFromDoc(doc);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
         }
     }
 
-    public static void addQuestToDatabase(Quest quest) {
+    public static Event getEventById(String eventId) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("events", "id", eventId);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+            return createEventFromDoc(doc);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static void updateEvent(Event event) {
+        try {
+            CollectionReference ref = firestore.collection("events");
+            DocumentReference docRef = ref.document(event.getId());
+
+            docRef.update("title", event.getTitle());
+            docRef.update("description", event.getDescription());
+            docRef.update("mahasiswaIds", event.getCommunityIds());
+            docRef.update("questIds", event.getQuestIDs());
+            docRef.update("communityIds", event.getCommunityIds());
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to update event: "+e.getMessage());
+        }
+    }
+
+    /// ------------------------------------
+    /// Achievement section
+    /// ------------------------------------
+
+    public static Achievement createAchievementFromDoc(QueryDocumentSnapshot doc) {
+        try {
+            String id = doc.getString("id");
+            String name = doc.getString("name");
+
+            Achievement ach = new Achievement(name, id);
+            ach.setTags((List<String>) doc.get("tags"));
+
+            return ach;
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static Achievement getAchievementById(String achId) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("achievements", "id", achId);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+            return createAchievementFromDoc(doc);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static void storeAchievementToDatabase(Achievement ach) {
+        try {
+            Map<String, Object> achData = ach.getStringObjectMap();
+            DocumentReference docRef = firestore.collection("achievements").document(ach.getId());
+            ApiFuture<WriteResult> result = docRef.set(achData);
+            result.get();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    /// ------------------------------------
+    /// Quests section
+    /// ------------------------------------
+
+    public static Quest createQuestFromDoc(QueryDocumentSnapshot doc) {
+        try {
+            String id = doc.getString("id");
+            String title = doc.getString("title");
+            String description = doc.getString("description");
+            Quest quest = new Quest(title, description, id);
+
+            List<String> achIds = (List<String>)doc.get("achivementIds");
+            assert achIds != null;
+            achIds.forEach(achId -> {
+                Achievement ach = getAchievementById(achId);
+                if (ach != null) {
+                    quest.addAchievement(ach);
+                }
+            });
+
+            return quest;
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static void storeQuestToDatabase(Quest quest) {
         try {
             Map<String, Object> comData = quest.getStringObjectMap();
             DocumentReference docRef = firestore.collection("quests").document(quest.getId());
@@ -340,15 +445,7 @@ public class AppManager {
         try {
             QuerySnapshot q = getQueryByFieldValue("quests", "id", questId);
             QueryDocumentSnapshot doc = q.getDocuments().getFirst();
-            String title = doc.getString("title");
-            String description = doc.getString("description");
-            boolean isCompleted = Boolean.TRUE.equals(doc.getBoolean("isCompleted"));
-
-            Quest quest = new Quest(title, description);
-            quest.setId(questId);
-            quest.setCompletion(isCompleted);
-
-            return quest;
+            return createQuestFromDoc(doc);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
@@ -359,17 +456,7 @@ public class AppManager {
         try {
             QuerySnapshot q = getQueryByFieldValue("quests", "title", questName);
             QueryDocumentSnapshot doc = q.getDocuments().getFirst();
-            String id = doc.getString("id");
-            String title = doc.getString("title");
-            String description = doc.getString("description");
-            boolean isCompleted = doc.getBoolean("isCompleted");
-            Quest quest = new Quest(title, description);
-            quest.setId(id);
-
-            if (isCompleted) {
-                quest.doQuest();
-            }
-            return quest;
+            return createQuestFromDoc(doc);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
@@ -397,7 +484,7 @@ public class AppManager {
                    // handle based on the type of change
                    switch (change.getType()) {
                        case ADDED -> {
-                           Community newCommunity = communityCreateFromDocument(change.getDocument());
+                           Community newCommunity = createCommunityFromDoc(change.getDocument());
                            communities.add(newCommunity);
                        }
                        case MODIFIED -> {
@@ -428,75 +515,105 @@ public class AppManager {
         }
     }
 
-    private static Community communityCreateFromDocument(DocumentSnapshot doc) {
+    private static Community createCommunityFromDoc(DocumentSnapshot doc) {
         String name = doc.getString("name");
         String ownerId = doc.getString("ownerID");
         String id = doc.getString("id");
-        User owner = getUserById(ownerId);
-        Community com = new Community(name, owner);
+        Community com = new Community(name, ownerId);
 
         // load chats
-        ArrayList<String> chats = (ArrayList<String>)doc.get("chatIDs");
-        assert chats != null;
-        chats.forEach(x -> {
+        ArrayList<String> chatIds = (ArrayList<String>)doc.get("chatIDs");
+        assert chatIds != null;
+        chatIds.forEach(x -> {
             Chat c = getChatById(x);
             if (c != null) {
                 com.addChat(c);
             }
         });
+
+        // load mahasiswa
+        ArrayList<String> mhsIds = (ArrayList<String>)doc.get("mahasiswaIDs");
+        assert mhsIds != null;
+        mhsIds.forEach(x -> {
+            Mahasiswa mhs = (Mahasiswa) getUserById(x);
+            if (mhs != null) {
+                com.addMahasiswa(mhs);
+            }
+        });
+
+        // load events
+        ArrayList<String> eventIds = (ArrayList<String>)doc.get("eventIDs");
+        assert eventIds != null;
+        eventIds.forEach(x -> {
+            Event event = getEventById(x);
+            if (event != null) {
+                com.addEvent(event);
+            }
+        });
+
         com.setId(id);
         return com;
     }
 
-    public static Community getCommunityByName(String communityName) {
+    public static void storeEventToCommunity(Event event, Community community) {
         try {
-            QuerySnapshot q = getQueryByFieldValue("Community", "name", communityName);
-            if (q.isEmpty()) {
-                throw new RuntimeException("Community dengan nama " + communityName + " tidak ditemukan");
-            }
+            storeEventToDatabase(event);
+            community.addEvent(event);
 
-            QueryDocumentSnapshot doc = q.getDocuments().get(0);
-            String id = doc.getString("id");
-            String name = doc.getString("name");
-            String ownerId = doc.getString("ownerID");
-            List<String> mahasiswaIds = (List<String>) doc.get("mahasiswaIDs");
-            List<String> questIds = (List<String>) doc.get("questIDs");
-            List<String> chatIds = (List<String>) doc.get("chatIDs");
+            Map<String, Object> updateData = new HashMap<>();
+            updateData.put("eventIDs", community.getEventIds());
 
-            User owner = new User(ownerId);
-            Community community = new Community(name, owner, id);
-
-            if (mahasiswaIds != null) {
-                for (String mhsId : mahasiswaIds) {
-                    community.addMahasiswa(new Mahasiswa(mhsId));
-                }
-            }
-
-            if (questIds != null) {
-                for (String qId : questIds) {
-                    community.addQuest(new Quest(qId));
-                }
-            }
-
-            if (chatIds != null) {
-                for (String cId : chatIds) {
-                    community.addChat(new Chat(cId));
-                }
-            }
-
-            return community;
+            firestore.collection("communities")
+                    .document(community.getId())
+                    .update(updateData);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch community: " + e.getMessage(), e);
+            System.err.println(e.getMessage());
         }
     }
 
+    public static void storeChatToCommunity(Chat chat, Community community) {
+        try {
+            storeChatToDatabase(chat);
+            community.addChat(chat);
 
+            Map<String, Object> updateData = new HashMap<>();
+            updateData.put("chatIDs", community.getChatIds());
+
+            firestore.collection("communities")
+                    .document(community.getId())
+                    .update(updateData);
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to add chat to community");
+        }
+    }
+
+    public static Community getCommunityByName(String comName) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("communities", "name", comName);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+            return createCommunityFromDoc(doc);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public static Community getCommunityById(String comId) {
+        try {
+            QuerySnapshot q = getQueryByFieldValue("communities", "id", comId);
+            QueryDocumentSnapshot doc = q.getDocuments().getFirst();
+            return createCommunityFromDoc(doc);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
 
     private static void communityUpdateLocal(Community community, DocumentSnapshot doc) {
         String name = doc.getString("name");
         String id = doc.getString("id");
 
-        // load chats
         ArrayList<String> chatIDs = (ArrayList<String>)doc.get("chatIDs");
         ArrayList<Chat> chats = new ArrayList<>();
 

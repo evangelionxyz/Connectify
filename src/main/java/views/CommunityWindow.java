@@ -36,7 +36,7 @@ public class CommunityWindow extends WindowBase {
         ImGui.inputText("Name", nameInput);
         Runnable create = () -> {
             if (nameInput.isNotEmpty()) {
-                Community com = new Community(nameInput.get(), AppManager.currentUser);
+                Community com = new Community(nameInput.get(), AppManager.currentUser.getId());
                 AppManager.storeCommunityToDatabase(com);
             }
         };
@@ -83,7 +83,7 @@ public class CommunityWindow extends WindowBase {
                         }
 
                         if (ImGui.isItemHovered() && ImGui.isItemClicked(ImGuiMouseButton.Right)) {
-                            if (cm.getOwner().getId().equals(AppManager.currentUser.getId())) {
+                            if (cm.getOwnerId().equals(AppManager.currentUser.getId())) {
                                 ImGui.openPopup("##community_context_menu", ImGuiPopupFlags.AnyPopupLevel);
                                 communityContextOpen = cm;
                             }
@@ -141,7 +141,7 @@ public class CommunityWindow extends WindowBase {
                     Runnable sendMessage = () -> {
                         if (userChatInput.isNotEmpty()) {
                             Chat newChat = new Chat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
-                            AppManager.addChatToCommunity(AppManager.selectedCommunity, newChat);
+                            AppManager.storeChatToCommunity(newChat, AppManager.selectedCommunity);
                             userChatInput.clear();
                         }
                     };
@@ -158,7 +158,7 @@ public class CommunityWindow extends WindowBase {
 
                     Runnable sendEventChat = () -> {
                         EventChat eventChat = new EventChat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
-                        AppManager.addChatToCommunity(AppManager.selectedCommunity, eventChat);
+                        AppManager.storeChatToCommunity(eventChat, AppManager.selectedCommunity);
                         userChatInput.clear();
                     };
 
