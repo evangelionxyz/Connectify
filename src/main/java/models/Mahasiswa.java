@@ -1,37 +1,33 @@
 package models;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Mahasiswa extends User {
-    private List<Quest> quests;
+    private final Map<Quest, Boolean> quests;
     private List<Achievement> achievements;
 
     public Mahasiswa(String name, String username, String company) {
         super(name, username, "MAHASISWA", company);
-        quests = new ArrayList<>();
-    }
-
-    public void participateEvent(Event e) {
-        e.addMahasiswa(this.id);
+        quests = new HashMap<>();
     }
 
     public void addQuest(Quest q) {
-        quests.add(q);
+        quests.put(q, false);
     }
 
-    public void addAchievement(Achievement ach) {
-        achievements.add(ach);
+    public void doQuest(Quest quest) {
+
     }
 
-    public final List<Achievement> getAchievement() {
+    public List<Achievement> getAchievement() {
         return achievements;
     }
 
-    public final List<Quest> getQuests() {
+    public Map<Quest, Boolean> getQuests() {
         return quests;
     }
-
 
     @Override
     public String toString() {

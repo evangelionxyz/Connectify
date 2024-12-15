@@ -2,53 +2,67 @@ package models;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Quest extends ModelBase {
     private String title;
     private String description;
-    private boolean isCompleted;
+
+    private final List<String> achievementIds;
+    private final List<Achievement> achievements;
 
     public Quest(String title, String description) {
+        super();
+
         this.title = title;
         this.description = description;
-        this.isCompleted = false;
+
+        achievements = new ArrayList<>();
+        achievementIds = new ArrayList<>();
     }
 
-    public void doQuest() {
-        if (isCompleted) {
-            System.out.println("Quest Telah Dikerjakan");
-        } else {
-            isCompleted = true;
+    public Quest(String title, String description, String id) {
+        super(id);
 
-            System.out.println("Quest Telah Selesai");
-        }
-    }
-
-    public void setCompletion(boolean completion) {
-        this.isCompleted = completion;
-    }
-
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
         this.title = title;
-    }
+        this.description = description;
 
-    public String getDescription() {
-        return description;
+        achievements = new ArrayList<>();
+        achievementIds = new ArrayList<>();
     }
 
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public boolean isCompleted() {
-        return isCompleted;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void addAchievement(Achievement ach) {
+        if (!achievements.contains(ach)) {
+            achievements.add(ach);
+            achievementIds.add(ach.id);
+        }
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public List<Achievement> getAchievements() {
+        return achievements;
+    }
+
+    public List<String> getAchievementIds() {
+        return achievementIds;
     }
 
     @NotNull
@@ -57,7 +71,7 @@ public class Quest extends ModelBase {
         stringObj.put("id", id);
         stringObj.put("title", title);
         stringObj.put("description", description);
-        stringObj.put("isCompleted", isCompleted);
+        stringObj.put("achievementIds", achievementIds);
         return stringObj;
     }
 }

@@ -10,16 +10,16 @@ import java.util.List;
 public class EventTest {
     public static void main(String[] args) {
         Mahasiswa pemilik = new Mahasiswa("evan", "evan", "telu");
-        Community community = new Community("Offsider", pemilik);
+        Community community = new Community("Offsider", pemilik.getId());
 
         Event hackathon = new Event("Hackathon 2024", "GDSC");
 
         Mahasiswa syahdan = new Mahasiswa("syahdan", "syahdan", "telu");
         Mahasiswa yudha = new Mahasiswa("yuda", "yuda", "telu");
         Mahasiswa nopal = new Mahasiswa("nopal", "nopal", "telu");
-        hackathon.addMahasiswa(syahdan.getId());
-        hackathon.addMahasiswa(yudha.getId());
-        hackathon.addMahasiswa(nopal.getId());
+        hackathon.addMahasiswaId(syahdan.getId());
+        hackathon.addMahasiswaId(yudha.getId());
+        hackathon.addMahasiswaId(nopal.getId());
 
         Quest quest1 = new Quest("Buat Presentasi", "Membuat Presentasi tentang C++");
         Quest quest2 = new Quest("Bentuk Kelompok", "Buat Kelompok Maksimal 5 orang dan berfoto bersama mereka");
@@ -31,7 +31,7 @@ public class EventTest {
         hackathon.addQuest(quest4);
 
         System.out.println("Mahasiswa yang terdaftar pada event:");
-        for (String m : hackathon.getMahasiswaIDs()) {
+        for (String m : hackathon.getMahasiswaIds()) {
             System.out.println("- " + m);
         }
 
