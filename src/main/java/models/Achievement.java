@@ -1,7 +1,11 @@
 package models;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Achievement extends ModelBase {
     private String name;
@@ -10,7 +14,14 @@ public class Achievement extends ModelBase {
     public Achievement(String name, List<String> tags) {
         super();
         this.name = name;
-        this.tags = new ArrayList<>(tags);
+        this.tags = tags;
+    }
+
+    public Achievement(String name, String id) {
+        super(id);
+
+        this.name = name;
+        this.tags = new ArrayList<>();
     }
 
     public String getName() {
@@ -25,30 +36,30 @@ public class Achievement extends ModelBase {
         return tags;
     }
 
-    public boolean isExists(String tag) {
-       for (String name : tags) {
-           if (name.equals(tag)) {
-               return true;
-           }
-       }
-       return false;
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     public void addTags(String tag) {
-        if (!isExists(tag)) {
+        if (!tags.contains(tag)) {
             tags.add(tag);
-            System.out.println("berhasil menambahkan tag");
-        }else {
-            System.out.println("tag sudah ada tidak dapat menambahkan");
         }
     }
 
     public void removeTags(String tag)  {
-        if (isExists(tag)) {
-            tags.remove(tag);
-            System.out.println("berhasil menghapus tags");
-        }else {
-            System.out.println("tags kosong tidak dapat menghapus!");
-        }
+        tags.remove(tag);
+    }
+
+    @NotNull
+    public Map<String, Object> getStringObjectMap() {
+        Map<String, Object> stringObj = new HashMap<>();
+        stringObj.put("id", id);
+        stringObj.put("name", name);
+        stringObj.put("tags", tags);
+        return stringObj;
+    }
+
+    public boolean isExists(String tag) {
+        return tags.contains(tag);
     }
 }

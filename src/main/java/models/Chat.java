@@ -16,6 +16,15 @@ public class Chat extends ModelBase {
     }
 
     public Chat(String message, Timestamp timestamp, User sender) {
+        super();
+        this.message = message;
+        this.timestamp = timestamp;
+        this.sender = sender;
+        this.type = "default";
+    }
+
+    public Chat(String message, Timestamp timestamp, User sender, String id) {
+        super(id);
         this.message = message;
         this.timestamp = timestamp;
         this.sender = sender;

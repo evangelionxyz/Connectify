@@ -9,41 +9,51 @@ import java.util.Map;
 
 public class Event extends ModelBase {
     private String title;
-    private List<String> mahasiswaIds;
-    private List<String> questsIds;
-    private String community;
     private String description;
     private String creatorId;
+
+    private final List<Mahasiswa> mahasiswa;
+    private final List<Quest> quests;
+    private final List<Community> communities;
+
+    private List<String> mahasiswaIds;
+    private List<String> questsIds;
     private List<String> communityIds;
 
-    public Event(String title, String community) {
+    public Event(String title, String description) {
         super();
         this.title = title;
-        this.community = community;
+        this.description = description;
+
+        this.mahasiswa = new ArrayList<>();
+        this.quests = new ArrayList<>();
+        this.communities = new ArrayList<>();
+
         this.mahasiswaIds = new ArrayList<>();
         this.questsIds = new ArrayList<>();
         this.communityIds = new ArrayList<>();
     }
 
-    public String getCommunity() {
-        return community;
-    }
+    public Event(String title, String description, String id) {
+        super(id);
+        this.title = title;
+        this.description = description;
 
+        this.mahasiswa = new ArrayList<>();
+        this.quests = new ArrayList<>();
+        this.communities = new ArrayList<>();
 
-    public void setCommunity(String community) {
-        this.community = community;
-    }
-
-    public void addCommunityId(String communityId) {
-        this.communityIds.add(communityId);
-    }
-
-    public void setCommunityIds(List<String> communityIds) {
-        this.communityIds = communityIds;
+        this.mahasiswaIds = new ArrayList<>();
+        this.questsIds = new ArrayList<>();
+        this.communityIds = new ArrayList<>();
     }
 
     public void setCreatorId(String creatorId) {
         this.creatorId = creatorId;
+    }
+
+    public final String getTitle() {
+        return title;
     }
 
     public final String getCreatorId() {
@@ -62,32 +72,53 @@ public class Event extends ModelBase {
         this.title = title;
     }
 
-    public void addMahasiswa(String mhsId) {
-        mahasiswaIds.add(mhsId);
+    public void addCommunity(Community com) {
+        if (!communities.contains(com)) {
+            communities.add(com);
+            communityIds.add(com.id);
+        }
+    }
+
+    public List<String> getCommunityIds() {
+        return communityIds;
+    }
+
+    public List<Community> getCommunities() {
+        return communities;
     }
 
     public void addQuest(Quest quest) {
-        questsIds.add(quest.getId());
-    }
-
-    public void setMahasiswaIds(List<String> mahasiswaIds) {
-        this.mahasiswaIds = mahasiswaIds;
-    }
-
-    public void setQuestsIds(List<String> questsIds) {
-        this.questsIds = questsIds;
+        if (!quests.contains(quest)) {
+            quests.add(quest);
+            questsIds.add(quest.getId());
+        }
     }
 
     public List<String> getQuestIDs() {
         return questsIds;
     }
 
-    public List<String> getMahasiswaIDs() {
+    public List<Quest> getQuests() {
+        return quests;
+    }
+
+    public void addMahasiswa(Mahasiswa mhs) {
+        if (!mahasiswa.contains(mhs)) {
+            mahasiswa.add(mhs);
+            mahasiswaIds.add(mhs.getId());
+        }
+    }
+
+    public void addMahasiswaId(String mhsId) {
+        mahasiswaIds.add(mhsId);
+    }
+
+    public List<String> getMahasiswaIds() {
         return mahasiswaIds;
     }
 
-    public final String getTitle() {
-        return title;
+    public List<Mahasiswa> getMahasiswa() {
+        return mahasiswa;
     }
 
     @NotNull
@@ -98,8 +129,9 @@ public class Event extends ModelBase {
         stringObj.put("description", description);
         stringObj.put("mahasiswaIds", mahasiswaIds);
         stringObj.put("questsIds", questsIds);
-        stringObj.put("creatorId", creatorId);
         stringObj.put("communityIds", communityIds);
+
+        stringObj.put("creatorId", creatorId);
         return stringObj;
     }
 }
