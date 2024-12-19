@@ -542,6 +542,8 @@ public class UnitTest {
     }
 }
 
+//quest hanya bisa dibuat dalam event, jadi harus dibuat event dlu
+
 
 class Test {
     public static void main(String[] args) {
