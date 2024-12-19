@@ -296,6 +296,15 @@ public class UnitTest {
                 for (Event event : community.getEvents()) {
                     System.out.printf("%s: %s\n", event.getTitle(), event.getDescription());
 
+                    System.out.println("Pilih event :");
+
+
+                    if (AppManager.currentUser != null) {
+                        for (int i = 0; i < event.getQuests(); i++) {
+                            System.out.println("Daftar quest dalam event: " + community.getEvents());
+                        }
+                    }
+
                     // TODO: Print quests
                 }
 
