@@ -11,8 +11,6 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import models.*;
 
-import java.util.ArrayList;
-
 public class CommunityWindow extends WindowBase {
     private final ImBoolean imCreateWin = new ImBoolean(false);
     private final ImString nameInput = new ImString(256);
@@ -20,9 +18,6 @@ public class CommunityWindow extends WindowBase {
 
     private final ImInt imIntIndex = new ImInt(-1);
     private String selectedEventStr;
-
-    private ArrayList<Integer> selectedIndices = new ArrayList<>();
-    private String filter = "";
 
     private Community communityContextOpen = null;
 
@@ -163,47 +158,15 @@ public class CommunityWindow extends WindowBase {
                         userChatInput.clear();
                     };
 
-                    if (ImGui.beginCombo("Select events", "Selected "+selectedIndices.size() + " items")) {
-                        for (int i = 0; i < AppManager.eventTitles.size(); ++i) {
-                            String title = AppManager.eventTitles.get(i);
-
-                            if (!filter.isEmpty() && !title.toLowerCase().contains(filter.toLowerCase())) {
-                                continue;
-                            }
-
-                            boolean isSelected = selectedIndices.contains(i);
-
-                            if (ImGui.selectable(title, isSelected)) {
-                                if (isSelected) {
-                                    selectedIndices.remove(Integer.valueOf(i));
-                                } else {
-                                    selectedIndices.add(i);
-                                }
-                            }
-                        }
-                        ImGui.endCombo();
-                    }
-
-                    if (!selectedIndices.isEmpty()) {
-                        ImGui.text("Selected Events:");
-                        for (int index : selectedIndices) {
-                            ImGui.text("- "+AppManager.eventTitles.get(index));
-                        }
-                    }
-
                     ImGui.sameLine();
                     if (ImGui.button("Send", new ImVec2(200.0f, ImGui.getContentRegionAvail().y))) {
                         sendEventChat.run();
                     }
                 }
-
-
             }
             ImGui.endChild(); // !community_send_message
-
         }
         ImGui.endChild(); //!community_content
-
         ImGui.end();
     }
 

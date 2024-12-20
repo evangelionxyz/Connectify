@@ -7,6 +7,7 @@ public class EventChat extends Chat {
     private String imageId;
 
     public EventChat() {
+        super();
         super.type = "event";
     }
 

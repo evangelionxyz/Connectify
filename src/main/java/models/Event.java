@@ -16,9 +16,9 @@ public class Event extends ModelBase {
     private final List<Quest> quests;
     private final List<Community> communities;
 
-    private List<String> mahasiswaIds;
-    private List<String> questsIds;
-    private List<String> communityIds;
+    private final List<String> mahasiswaIds;
+    private final List<String> questsIds;
+    private final List<String> communityIds;
 
     public Event(String title, String description) {
         super();

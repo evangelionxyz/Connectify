@@ -18,11 +18,9 @@ import models.*;
 public class AppManager {
     public static FirebaseApp firebaseApp;
     public static Firestore firestore;
-
     public static User currentUser = null;
     public static Community selectedCommunity = null;
     public static Event selectedEvent = null;
-
     public static List<Event> events = new ArrayList<>();
     public static List<Community> communities = new ArrayList<>();
     public static ArrayList<String> eventTitles = new ArrayList<>();
@@ -31,11 +29,8 @@ public class AppManager {
         FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");
         GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
         FirebaseOptions options = FirebaseOptions.builder().setCredentials(credentials).build();
-
         firebaseApp = FirebaseApp.initializeApp(options);
         firestore = FirestoreClient.getFirestore(firebaseApp);
-
-        // initialize
         communityStartListening();
         eventStartListening();
     }

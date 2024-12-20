@@ -12,7 +12,6 @@ public class EncryptionUtils {
     private static final String ALGORITHM = "AES";
     private static final String TRANSFORMATION = "AES";
     private static final String KEY_FILE_PATH = "C:/connectify-telu-aes-key.txt";
-
     private static SecretKey globalSecretKey;
 
     public static SecretKey getGlobalSecretKey() {

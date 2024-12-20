@@ -1,7 +1,6 @@
 package models;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
 
 public class Community extends ModelBase {
@@ -9,11 +8,9 @@ public class Community extends ModelBase {
     private List<Mahasiswa> mahasiswa;
     private List<Chat> chats;
     private final List<Event> events;
-
     private final List<String> mahasiswaIds;
     private final List<String> chatIds;
     private final List<String> eventIds;
-
     private String ownerId;
 
     public Community(String name, String ownerId) {
