@@ -58,7 +58,7 @@ public class CommunityWindow extends WindowBase {
         // Calculate height for the main chat content based on remaining space.
         final float bottomHeight = 25.0f;
         float availableHeight = ImGui.getContentRegionAvailY() - bottomHeight - 10;
-//
+
         // LEFT SECTION
         ImGui.beginChild("##communities", new ImVec2(210.0f, 0.0f), true);
         {
@@ -113,7 +113,6 @@ public class CommunityWindow extends WindowBase {
         }
         ImGui.endChild(); // !communities
 
-//
         ImGui.sameLine();
 
         // RIGHT SECTION
@@ -137,6 +136,7 @@ public class CommunityWindow extends WindowBase {
                     Runnable sendMessage = () -> {
                         if (userChatInput.isNotEmpty()) {
                             Chat newChat = new Chat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
+                            AppManager.storeChatToDatabase(newChat);
                             AppManager.storeChatToCommunity(newChat, AppManager.selectedCommunity);
                             userChatInput.clear();
                         }
@@ -150,19 +150,6 @@ public class CommunityWindow extends WindowBase {
                         sendMessage.run();
                     }
                 }
-                else {
-
-                    Runnable sendEventChat = () -> {
-                        EventChat eventChat = new EventChat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
-                        AppManager.storeChatToCommunity(eventChat, AppManager.selectedCommunity);
-                        userChatInput.clear();
-                    };
-
-                    ImGui.sameLine();
-                    if (ImGui.button("Send", new ImVec2(200.0f, ImGui.getContentRegionAvail().y))) {
-                        sendEventChat.run();
-                    }
-                }
             }
             ImGui.endChild(); // !community_send_message
         }
@@ -174,22 +161,24 @@ public class CommunityWindow extends WindowBase {
         ImGui.text(c.getSender().getUsername());
         if (c.getType().equals("default")) {
             ImGui.text(c.getMessage());
+            ImGui.text(c.getTimestamp().toDate().toString());
+
         } else if (c.getType().equals("event")) {
             EventChat ec = (EventChat) c;
             if (ec.getEvent() != null) {
-                ImGui.text("Attachment");
                 Event ev = ec.getEvent();
+                ImGui.text("EVENT - " + ev.getTitle());
 
-                ImGui.text(ev.getTitle());
+                ImGui.text(c.getTimestamp().toDate().toString());
 
-                if (AppManager.currentUser instanceof Mahasiswa) {
+                ImGui.sameLine();
+                if (AppManager.currentUser.isMahasiswa()) {
                     if (ImGui.button("Apply")) {
                         System.out.println("here here bandage");
                     }
                 }
             }
         }
-        ImGui.text(c.getTimestamp().toDate().toString());
         ImGui.separator();
     }
 }

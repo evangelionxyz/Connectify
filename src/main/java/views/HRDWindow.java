@@ -1,5 +1,6 @@
 package views;
 
+import com.google.cloud.Timestamp;
 import core.AppManager;
 import imgui.ImVec2;
 import imgui.ImVec4;
@@ -7,11 +8,14 @@ import imgui.flag.*;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import models.Community;
 import models.Event;
+import models.EventChat;
 
 public class HRDWindow extends WindowBase {
     private final ImBoolean imCreateWin = new ImBoolean(false);
     private final ImBoolean imDeleteConfirmWin = new ImBoolean(false);
+    private final ImString userChatInput = new ImString(256);
     private final ImString eventTitleInput = new ImString(128);
     private final ImString eventDescInput = new ImString(256);
     private final ImString eventTitle = new ImString(256);
@@ -129,7 +133,6 @@ public class HRDWindow extends WindowBase {
 
         ImGui.endChild(); // !events
 
-
         ImGui.sameLine();
         // RIGHT SECTION
         ImGui.beginChild("##event_content", new ImVec2(0.0f, availableHeight), true);
@@ -157,6 +160,40 @@ public class HRDWindow extends WindowBase {
                 ImGui.sameLine();
                 if (ImGui.button("Delete", new ImVec2(150.0f, buttonHeight))) {
                     imDeleteConfirmWin.set(true);
+                }
+
+                ImGui.inputText("Message", userChatInput);
+                ImGui.sameLine();
+                if (ImGui.button("Send to community", new ImVec2(200.0f, buttonHeight))) {
+                    if (AppManager.selectedEvent != null) {
+                        EventChat newChat = new EventChat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
+                        newChat.setEvent(AppManager.selectedEvent);
+                        AppManager.storeChatToDatabase(newChat);
+                        AppManager.storeChatToCommunity(newChat, AppManager.selectedCommunity);
+                        AppManager.storeEventToCommunity(AppManager.selectedEvent, AppManager.selectedCommunity);
+                        userChatInput.clear();
+                    }
+                }
+
+                for (Community cm : AppManager.communities) {
+                    boolean selected = AppManager.selectedCommunity != null && AppManager.selectedCommunity.getId().equals(cm.getId());
+                    int treeFlags = (selected ? ImGuiTreeNodeFlags.Selected : ImGuiTreeNodeFlags.None) | ImGuiTreeNodeFlags.Leaf
+                            | ImGuiTreeNodeFlags.Framed | ImGuiTreeNodeFlags.SpanFullWidth;
+
+                    if (selected) imgui.ImGui.pushStyleColor(ImGuiCol.Header, new ImVec4(0.123f, 0.123f, 0.7633f, 1.0f));
+                    imgui.ImGui.pushStyleColor(ImGuiCol.HeaderHovered, new ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
+                    imgui.ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, new ImVec2(10.0f, 10.0f));
+
+                    if (imgui.ImGui.treeNodeEx(cm.getId(), treeFlags, cm.getName())) {
+                        if (imgui.ImGui.isItemClicked(ImGuiMouseButton.Left)) {
+                            AppManager.selectedCommunity = cm;
+                        }
+                        imgui.ImGui.treePop();
+                    }
+
+                    imgui.ImGui.popStyleVar(1);
+                    imgui.ImGui.popStyleColor(1);
+                    if (selected) imgui.ImGui.popStyleColor(1);
                 }
             }
         }

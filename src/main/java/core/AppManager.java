@@ -145,8 +145,17 @@ public class AppManager {
             String id = doc.getString("id");
             String message = doc.getString("message");
             String senderId = doc.getString("sender");
+            String type = doc.getString("type");
             User sender = getUserById(senderId);
             Timestamp timestamp = doc.getTimestamp("timestamp");
+
+            if (type != null && type.equals("event")) {
+                String eventId = doc.getString("eventId");
+                EventChat eventChat = new EventChat(message, timestamp, sender);
+                Event event = getEventById(eventId);
+                eventChat.setEvent(event);
+                return eventChat;
+            }
             return new Chat(message, timestamp, sender, id);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -165,6 +174,17 @@ public class AppManager {
     }
 
     public static void storeChatToDatabase(Chat chat) {
+        try {
+            Map<String, Object> chatData = chat.getStringObjectMap();
+            DocumentReference docRef = firestore.collection("chats").document(chat.getId());
+            ApiFuture<WriteResult> result = docRef.set(chatData);
+            result.get();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to send message: "+e.getMessage());
+        }
+    }
+
+    public static void storeChatToDatabase(EventChat chat) {
         try {
             Map<String, Object> chatData = chat.getStringObjectMap();
             DocumentReference docRef = firestore.collection("chats").document(chat.getId());
@@ -569,12 +589,9 @@ public class AppManager {
 
     public static void storeChatToCommunity(Chat chat, Community community) {
         try {
-            storeChatToDatabase(chat);
             community.addChat(chat);
-
             Map<String, Object> updateData = new HashMap<>();
             updateData.put("chatIDs", community.getChatIds());
-
             firestore.collection("communities")
                     .document(community.getId())
                     .update(updateData);
