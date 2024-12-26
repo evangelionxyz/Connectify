@@ -476,6 +476,7 @@ public class AppManager {
                            .filter(c -> c.getId().equals(docId))
                            .findFirst()
                            .orElse(null);
+
                    // handle based on the type of change
                    switch (change.getType()) {
                        case ADDED -> {
@@ -619,6 +620,7 @@ public class AppManager {
                 chats.add(c);
             }
         });
+
         community.setChats(chats);
         community.setName(name);
         community.setId(id);

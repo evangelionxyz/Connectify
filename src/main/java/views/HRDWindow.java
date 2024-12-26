@@ -11,9 +11,11 @@ import models.Event;
 
 public class HRDWindow extends WindowBase {
     private final ImBoolean imCreateWin = new ImBoolean(false);
-    private final ImString eventTitle = new ImString(128);
+    private final ImBoolean imDeleteConfirmWin = new ImBoolean(false);
+    private final ImString eventTitleInput = new ImString(128);
+    private final ImString eventDescInput = new ImString(256);
+    private final ImString eventTitle = new ImString(256);
     private final ImString eventDesc = new ImString(256);
-    private Event eventContextOpen = null;
 
     @Override
     public void init() {
@@ -21,16 +23,17 @@ public class HRDWindow extends WindowBase {
 
     private void createWindow() {
         ImGui.begin("Create new Event", imCreateWin, ImGuiWindowFlags.AlwaysAutoResize);
-        ImGui.inputText("Title", eventTitle);
-        ImGui.inputTextMultiline("Description", eventDesc);
+        ImGui.inputText("Title", eventTitleInput);
+        ImGui.inputTextMultiline("Description", eventDescInput);
 
         Runnable create = () -> {
-            if (eventTitle.isNotEmpty()) {
-                Event newEvent = new Event(eventTitle.get(), eventDesc.get());
+            if (eventTitleInput.isNotEmpty()) {
+                Event newEvent = new Event(eventTitleInput.get(), eventDescInput.get());
                 newEvent.setCreatorId(AppManager.currentUser.getId());
-                newEvent.setDescription(eventDesc.get());
-
+                newEvent.setDescription(eventDescInput.get());
                 AppManager.storeEventToDatabase(newEvent);
+                eventTitleInput.clear();
+                eventDescInput.clear();
             }
         };
 
@@ -41,6 +44,24 @@ public class HRDWindow extends WindowBase {
         ImGui.sameLine();
         if (ImGui.button("Cancel")) {
             imCreateWin.set(false);
+            eventTitleInput.clear();
+            eventDescInput.clear();
+        }
+        ImGui.end();
+    }
+
+    private void deleteConfirmationWindow() {
+        ImGui.begin("Delete Confirmation", imDeleteConfirmWin, ImGuiWindowFlags.AlwaysAutoResize);
+        ImGui.text("Are you sure to delete this event?");
+
+        if (ImGui.button("Delete")) {
+            AppManager.removeDocument("events", AppManager.selectedEvent.getId());
+            AppManager.selectedEvent = null;
+            imDeleteConfirmWin.set(false);
+        }
+        ImGui.sameLine();
+        if (ImGui.button("Cancel")) {
+            imDeleteConfirmWin.set(false);
         }
         ImGui.end();
     }
@@ -50,6 +71,8 @@ public class HRDWindow extends WindowBase {
 
         if (imCreateWin.get()) {
             createWindow();
+        } else if (imDeleteConfirmWin.get()) {
+            deleteConfirmationWindow();
         }
 
         ImGui.begin("Event Manager");
@@ -79,24 +102,6 @@ public class HRDWindow extends WindowBase {
                         AppManager.selectedEvent = ev;
                         eventTitle.set(ev.getTitle());
                         eventDesc.set(ev.getDescription());
-                    }
-
-                    if (ImGui.isItemHovered() && ImGui.isItemClicked(ImGuiMouseButton.Right)) {
-                        if (ev.getCreatorId().equals(AppManager.currentUser.getId())) {
-                            ImGui.openPopup("##event_context_menu", ImGuiPopupFlags.AnyPopupLevel);
-                            eventContextOpen = ev;
-                        }
-                    }
-
-                    if (eventContextOpen != null) {
-                        if (ImGui.beginPopup("##event_context_menu")) {
-                            if (ImGui.menuItem("Delete")) {
-                                AppManager.removeDocument("events", eventContextOpen.getId());
-                                eventContextOpen = null;
-                                AppManager.selectedEvent = null;
-                            }
-                            ImGui.endPopup();
-                        }
                     }
 
                     if (opened) {
@@ -138,13 +143,20 @@ public class HRDWindow extends WindowBase {
                 if (ImGui.inputTextMultiline("Description", eventDesc)) {
                     AppManager.selectedEvent.setDescription(eventDesc.get());
                 }
+
                 Runnable editEvent = () -> {
                     if (eventTitle.isNotEmpty() && eventDesc.isNotEmpty()) {
                         AppManager.updateEvent(AppManager.selectedEvent);
                     }
                 };
+
                 if (ImGui.button("Save", new ImVec2(150.0f, buttonHeight))) {
                     editEvent.run();
+                }
+
+                ImGui.sameLine();
+                if (ImGui.button("Delete", new ImVec2(150.0f, buttonHeight))) {
+                    imDeleteConfirmWin.set(true);
                 }
             }
         }
