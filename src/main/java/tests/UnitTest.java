@@ -146,7 +146,8 @@ public class UnitTest {
                             Event selectedEvent = AppManager.getEventByTitle(eventTitle);
                             if (selectedEvent != null) {
                                 // INFO: Currently only working without communities
-                                AppManager.storeMahasiswaToEvent((Mahasiswa)AppManager.currentUser, selectedEvent);
+                                Mahasiswa mhs = (Mahasiswa)AppManager.getUserById(AppManager.currentUser.getId());
+                                AppManager.storeMahasiswaToEvent(mhs, selectedEvent);
                                 System.out.printf("Mahasiswa %s berhasil mengikuti event %s\n",
                                         AppManager.currentUser.getName(), selectedEvent.getTitle());
                             } else {
