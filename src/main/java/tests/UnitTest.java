@@ -145,15 +145,14 @@ public class UnitTest {
 
                             Event selectedEvent = AppManager.getEventByTitle(eventTitle);
                             if (selectedEvent != null) {
-
                                 // INFO: Currently only working without communities
-                                AppManager.storeMahasiswaToEvent((Mahasiswa)AppManager.currentUser, selectedEvent);
+                                AppManager.storeMahasiswaToEvent((Mahasiswa) AppManager.currentUser, selectedEvent);
                                 System.out.printf("Mahasiswa %s berhasil mengikuti event %s\n",
                                         AppManager.currentUser.getName(), selectedEvent.getTitle());
-
                             } else {
                                 System.out.println("Event dengan judul tersebut tidak ditemukan.");
                             }
+                            AppManager.storeEventToUser(selectedEvent, AppManager.currentUser);
                         } else {
                             System.out.println("Hanya mahasiswa yang bisa mendaftar ke event.");
                         }
@@ -234,7 +233,7 @@ public class UnitTest {
                     if (communityIndex >= 1 && communityIndex <= AppManager.communities.size()) {
                         Community selectedCommunity = AppManager.communities.get(communityIndex - 1);
                         if (!selectedCommunity.getMahasiswaIds().contains(AppManager.currentUser.getId())) {
-                            selectedCommunity.addMahasiswa((Mahasiswa) AppManager.currentUser);
+                            selectedCommunity.addUser(AppManager.currentUser);
                             System.out.println("Anda berhasil bergabung ke komunitas " + selectedCommunity.getName());
                         } else {
                             System.out.println("Anda sudah menjadi bagian dari komunitas ini.");
@@ -273,9 +272,17 @@ public class UnitTest {
             System.out.println("Username : " + currentUser.getUsername());
             System.out.println("Role     : " + currentUser.getType());
             System.out.println("Password : " + currentUser.getPassword());
-            System.out.println("============================================");
+
+            if (AppManager.currentUser.isMahasiswa()) {
+                System.out.println("Event    : ");
+                for (Event event : currentUser.getEvents()) {
+                    System.out.println("  - " + event.getTitle());
+                }
+                System.out.println("============================================");
+            }
         }
     }
+
 
     private void dataCommunityMenu() {
         System.out.println("=======================================");
@@ -298,9 +305,9 @@ public class UnitTest {
 
                     System.out.println("Pilih event :");
 
-
+                    List<Quest> quests = event.getQuests();
                     if (AppManager.currentUser != null) {
-                        for (int i = 0; i < event.getQuests(); i++) {
+                        for (int i = 0; i < quests.size(); i++) {
                             System.out.println("Daftar quest dalam event: " + community.getEvents());
                         }
                     }

@@ -63,6 +63,9 @@ public class AppManager {
     /// User section
     /// ------------------------------------
 
+
+
+
     public static User createUserFromDoc(QueryDocumentSnapshot doc) {
         try {
             String displayName = doc.getString("displayname");
@@ -140,6 +143,34 @@ public class AppManager {
             return null;
         }
     }
+
+    public static void storeEventToUser(Event event, User user) {
+        try {
+            if (user.isMahasiswa()) {
+                Mahasiswa mhs = (Mahasiswa) user;
+                mhs.addEvent(event);  // Add the event to the mahasiswa's list of events
+
+                // Optionally, update the Firestore record for the mahasiswa
+                Map<String, Object> updateData = new HashMap<>();
+                List<String> eventIds = new ArrayList<>();
+                for (Event e : mhs.getEvents()) {
+                    eventIds.add(e.getId());  // Manually collect the event IDs
+                }
+                updateData.put("eventIds", eventIds);
+
+                firestore.collection("users")
+                        .document(user.getId())
+                        .update(updateData);
+            } else {
+                System.err.println("[ERROR] User is not a mahasiswa.");
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to add event to user: " + e.getMessage());
+        }
+    }
+
+
+
 
     /// ------------------------------------
     /// Chat section
@@ -295,21 +326,26 @@ public class AppManager {
     }
 
     public static void storeMahasiswaToEvent(Mahasiswa mhs, Event event) {
-        try {
-            // add quests first
-            event.getQuests().forEach(mhs::addQuest);
-            event.addMahasiswa(mhs);
+        if (mhs instanceof Mahasiswa) {
+            try {
+                // add quests first
+                event.getQuests().forEach(mhs::addQuest);
+                event.addMahasiswa(mhs);
 
-            Map<String, Object> updateData = new HashMap<>();
-            updateData.put("mahasiswaIds", event.getMahasiswaIds());
+                Map<String, Object> updateData = new HashMap<>();
+                updateData.put("mahasiswaIds", event.getMahasiswaIds());
 
-            firestore.collection("events")
-                    .document(event.getId())
-                    .update(updateData);
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to add mahasiswa to event!");
+                firestore.collection("events")
+                        .document(event.getId())
+                        .update(updateData);
+            } catch (Exception e) {
+                System.err.println("[ERROR] Failed to add mahasiswa to event!");
+            }
+        } else {
+            System.out.println("Only Mahasiswa can be added to events.");
         }
     }
+
 
     public static void storeEventToDatabase(Event event) {
         try {
@@ -360,6 +396,7 @@ public class AppManager {
             System.err.println("[ERROR] Failed to update event: "+e.getMessage());
         }
     }
+
 
     /// ------------------------------------
     /// Achievement section

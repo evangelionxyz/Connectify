@@ -3,7 +3,9 @@ package models;
 import core.EncryptionUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class User extends ModelBase {
@@ -19,6 +21,7 @@ public class User extends ModelBase {
         this.username = username;
         this.type = type;
         this.company = company;
+
     }
 
     public User(String name, String username, String type, String company, String password) {
@@ -61,6 +64,11 @@ public class User extends ModelBase {
     public String getType() {
         return type;
     }
+
+    public List<Event> getEvents() {
+        return new ArrayList<>();
+    }
+
 
     @NotNull
     public Map<String, Object> getStringObjectMap() {
