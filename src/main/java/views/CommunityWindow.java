@@ -11,8 +11,6 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import models.*;
 
-import java.util.ArrayList;
-
 public class CommunityWindow extends WindowBase {
     private final ImBoolean imCreateWin = new ImBoolean(false);
     private final ImString nameInput = new ImString(256);
@@ -20,9 +18,6 @@ public class CommunityWindow extends WindowBase {
 
     private final ImInt imIntIndex = new ImInt(-1);
     private String selectedEventStr;
-
-    private ArrayList<Integer> selectedIndices = new ArrayList<>();
-    private String filter = "";
 
     private Community communityContextOpen = null;
 
@@ -63,7 +58,7 @@ public class CommunityWindow extends WindowBase {
         // Calculate height for the main chat content based on remaining space.
         final float bottomHeight = 25.0f;
         float availableHeight = ImGui.getContentRegionAvailY() - bottomHeight - 10;
-//
+
         // LEFT SECTION
         ImGui.beginChild("##communities", new ImVec2(210.0f, 0.0f), true);
         {
@@ -118,7 +113,6 @@ public class CommunityWindow extends WindowBase {
         }
         ImGui.endChild(); // !communities
 
-//
         ImGui.sameLine();
 
         // RIGHT SECTION
@@ -142,6 +136,7 @@ public class CommunityWindow extends WindowBase {
                     Runnable sendMessage = () -> {
                         if (userChatInput.isNotEmpty()) {
                             Chat newChat = new Chat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
+                            AppManager.storeChatToDatabase(newChat);
                             AppManager.storeChatToCommunity(newChat, AppManager.selectedCommunity);
                             userChatInput.clear();
                         }
@@ -155,55 +150,10 @@ public class CommunityWindow extends WindowBase {
                         sendMessage.run();
                     }
                 }
-                else {
-
-                    Runnable sendEventChat = () -> {
-                        EventChat eventChat = new EventChat(userChatInput.get(), Timestamp.now(), AppManager.currentUser);
-                        AppManager.storeChatToCommunity(eventChat, AppManager.selectedCommunity);
-                        userChatInput.clear();
-                    };
-
-                    if (ImGui.beginCombo("Select events", "Selected "+selectedIndices.size() + " items")) {
-                        for (int i = 0; i < AppManager.eventTitles.size(); ++i) {
-                            String title = AppManager.eventTitles.get(i);
-
-                            if (!filter.isEmpty() && !title.toLowerCase().contains(filter.toLowerCase())) {
-                                continue;
-                            }
-
-                            boolean isSelected = selectedIndices.contains(i);
-
-                            if (ImGui.selectable(title, isSelected)) {
-                                if (isSelected) {
-                                    selectedIndices.remove(Integer.valueOf(i));
-                                } else {
-                                    selectedIndices.add(i);
-                                }
-                            }
-                        }
-                        ImGui.endCombo();
-                    }
-
-                    if (!selectedIndices.isEmpty()) {
-                        ImGui.text("Selected Events:");
-                        for (int index : selectedIndices) {
-                            ImGui.text("- "+AppManager.eventTitles.get(index));
-                        }
-                    }
-
-                    ImGui.sameLine();
-                    if (ImGui.button("Send", new ImVec2(200.0f, ImGui.getContentRegionAvail().y))) {
-                        sendEventChat.run();
-                    }
-                }
-
-
             }
             ImGui.endChild(); // !community_send_message
-
         }
         ImGui.endChild(); //!community_content
-
         ImGui.end();
     }
 
@@ -211,22 +161,24 @@ public class CommunityWindow extends WindowBase {
         ImGui.text(c.getSender().getUsername());
         if (c.getType().equals("default")) {
             ImGui.text(c.getMessage());
+            ImGui.text(c.getTimestamp().toDate().toString());
+
         } else if (c.getType().equals("event")) {
             EventChat ec = (EventChat) c;
             if (ec.getEvent() != null) {
-                ImGui.text("Attachment");
                 Event ev = ec.getEvent();
+                ImGui.text("EVENT - " + ev.getTitle());
+                ImGui.text(c.getTimestamp().toDate().toString());
 
-                ImGui.text(ev.getTitle());
-
-                if (AppManager.currentUser instanceof Mahasiswa) {
+                ImGui.sameLine();
+                if (AppManager.currentUser.isMahasiswa()) {
                     if (ImGui.button("Apply")) {
-                        System.out.println("here here bandage");
+                        Mahasiswa mhs = (Mahasiswa)AppManager.getUserById(AppManager.currentUser.getId());
+                        AppManager.storeMahasiswaToEvent(mhs, ev);
                     }
                 }
             }
         }
-        ImGui.text(c.getTimestamp().toDate().toString());
         ImGui.separator();
     }
 }

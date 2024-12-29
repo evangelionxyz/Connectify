@@ -9,17 +9,16 @@ import java.util.Map;
 
 public class Achievement extends ModelBase {
     private String name;
-    List<String> tags;
+    private List<String> tags;
 
-    public Achievement(String name, List<String> tags) {
+    public Achievement(String name) {
         super();
         this.name = name;
-        this.tags = tags;
+        this.tags = new ArrayList<>();
     }
 
     public Achievement(String name, String id) {
         super(id);
-
         this.name = name;
         this.tags = new ArrayList<>();
     }
@@ -30,10 +29,6 @@ public class Achievement extends ModelBase {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<String> getTags() {
-        return tags;
     }
 
     public void setTags(List<String> tags) {
@@ -50,6 +45,14 @@ public class Achievement extends ModelBase {
         tags.remove(tag);
     }
 
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public boolean findTag(String tag) {
+        return tags.contains(tag);
+    }
+
     @NotNull
     public Map<String, Object> getStringObjectMap() {
         Map<String, Object> stringObj = new HashMap<>();
@@ -57,9 +60,5 @@ public class Achievement extends ModelBase {
         stringObj.put("name", name);
         stringObj.put("tags", tags);
         return stringObj;
-    }
-
-    public boolean isExists(String tag) {
-        return tags.contains(tag);
     }
 }

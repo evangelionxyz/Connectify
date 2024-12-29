@@ -71,50 +71,36 @@ public class Window {
 
     public void swapBuffer() {
         glClear(GL_COLOR_BUFFER_BIT);
-
         imguiGl3.newFrame();
         imguiGlfw.newFrame();
-
         ImGui.newFrame();
-
         beginDockSpace();
-
         if (imGuiRenderFunction != null) {
             imGuiRenderFunction.render();
         }
-
         endDockSpace();
-
         ImGui.render();
         imguiGl3.renderDrawData(ImGui.getDrawData());
-
         if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
             final long backupWindowPtr = glfwGetCurrentContext();
             ImGui.updatePlatformWindows();
             ImGui.renderPlatformWindowsDefault();
             glfwMakeContextCurrent(backupWindowPtr);
         }
-
         glfwSwapBuffers(windowHandle);
     }
 
     public void pollEvents() {
-        //glfwWaitEvents();
         glfwPollEvents();
     }
 
     private void applyTheme() {
         ImGuiStyle style = getImGuiStyle();
-
         ImGuiIO io = ImGui.getIO();
         io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
         io.setConfigViewportsNoDecoration(true);
-
         float fontSize = 16.0f;
         io.setFontDefault(io.getFonts().addFontFromFileTTF("resources/fonts/inter-regular.ttf", fontSize));
-
-        //style.setWindowPadding(new ImVec2(12.0f, 8.0f));
-
         style.setColor(ImGuiCol.Text, 1.00f, 1.0f, 1.00f, 1.00f);
         style.setColor(ImGuiCol.TextDisabled, 0.60f, 0.60f, 0.60f, 1.00f);
         style.setColor(ImGuiCol.WindowBg, 0.10f, 0.10f, 0.10f, 1.00f);
@@ -175,7 +161,6 @@ public class Window {
     @NotNull
     private static ImGuiStyle getImGuiStyle() {
         ImGuiStyle style = ImGui.getStyle();
-
         style.setWindowPadding(new ImVec2());
         style.setFramePadding(new  ImVec2(6.0f, 3.0f));
         style.setCellPadding(new ImVec2(7.0f, 3.0f));
@@ -208,18 +193,14 @@ public class Window {
         ImGui.setNextWindowPos(mainViewport.getWorkPos());
         ImGui.setNextWindowSize(mainViewport.getWorkSize());
         ImGui.setNextWindowViewport(mainViewport.getID());
-
         int dockNodeFlags = ImGuiDockNodeFlags.None;
         int windowFlags = ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoCollapse
                 | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus
                 | ImGuiWindowFlags.NoNavFocus;
-
         ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, new ImVec2(1.0f, 2.0f));
         ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
-
         ImGui.begin("Connectify", windowFlags);
         ImGui.popStyleVar(2);
-
         ImGuiStyle style = ImGui.getStyle();
         final float minWindowSizeX = 220.0f;
         final float minWindowSizeY = 26.0f;
@@ -240,7 +221,6 @@ public class Window {
         imguiGlfw.shutdown();
         imguiGl3.shutdown();
         ImGui.destroyContext();
-
         Callbacks.glfwFreeCallbacks(windowHandle);
         glfwDestroyWindow(windowHandle);
         glfwTerminate();

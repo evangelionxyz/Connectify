@@ -6,9 +6,8 @@ public class Main {
             EncryptionUtils.initialize();
             AppManager.initializeFirebase();
         } catch (Exception e) {
-            System.out.printf("Exception: %s\n", e.getMessage());
+            System.err.printf("Exception: %s\n", e.getMessage());
         }
-
         new Application("Connectify").run();
     }
 }

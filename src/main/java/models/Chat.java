@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Chat extends ModelBase {
-    private String message;
-    private Timestamp timestamp;
-    private User sender;
+    protected String message;
+    protected Timestamp timestamp;
+    protected User sender;
     protected String type;
 
     public Chat() {
@@ -60,6 +60,7 @@ public class Chat extends ModelBase {
         stringObj.put("message", message);
         stringObj.put("timestamp", timestamp);
         stringObj.put("sender", sender.getId());
+        stringObj.put("type", type);
         return stringObj;
     }
 }

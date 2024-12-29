@@ -18,24 +18,21 @@ import models.*;
 public class AppManager {
     public static FirebaseApp firebaseApp;
     public static Firestore firestore;
-
     public static User currentUser = null;
     public static Community selectedCommunity = null;
+    public static Quest selectedQuest = null;
     public static Event selectedEvent = null;
-
     public static List<Event> events = new ArrayList<>();
     public static List<Community> communities = new ArrayList<>();
     public static ArrayList<String> eventTitles = new ArrayList<>();
+    public static ArrayList<Event> userEvents = new ArrayList<>();
 
     public static void initializeFirebase() throws IOException {
         FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");
         GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
         FirebaseOptions options = FirebaseOptions.builder().setCredentials(credentials).build();
-
         firebaseApp = FirebaseApp.initializeApp(options);
         firestore = FirestoreClient.getFirestore(firebaseApp);
-
-        // initialize
         communityStartListening();
         eventStartListening();
     }
@@ -62,10 +59,6 @@ public class AppManager {
     /// ------------------------------------
     /// User section
     /// ------------------------------------
-
-
-
-
     public static User createUserFromDoc(QueryDocumentSnapshot doc) {
         try {
             String displayName = doc.getString("displayname");
@@ -76,9 +69,39 @@ public class AppManager {
             String userId = doc.getString("id");
             assert encryptedPassword != null;
             String password = EncryptionUtils.decrypt(encryptedPassword, EncryptionUtils.getGlobalSecretKey());
-            User user = new User(displayName, username, type, company, password);
-            user.setId(userId);
-            return user;
+
+            if (type.equals("MAHASISWA")) {
+                Map<String, Boolean> questData = (Map<String, Boolean>)doc.get("quests");
+                Map<Quest, Boolean> questMap = new HashMap<>();
+                if (questData != null) {
+                    for (Map.Entry<String, Boolean> entry : questData.entrySet()) {
+                        Quest quest = getQuestById(entry.getKey());
+                        if (quest != null) {
+                            questMap.put(quest, entry.getValue());
+                        }
+                    }
+                }
+
+                Mahasiswa mahasiswa = new Mahasiswa(displayName, username, company, password);
+
+                mahasiswa.setId(userId);
+                mahasiswa.setQuests(questMap);
+
+                List<String> achIds = (List<String>)doc.get("achievementIds");
+                achIds.forEach(id -> {
+                    Achievement ach = getAchievementById(id);
+                    if (ach != null) {
+                        mahasiswa.addAchievement(ach);
+                    }
+                });
+
+                return mahasiswa;
+            } else {
+                User user = new User(displayName, username, type, company, password);
+                user.setId(userId);
+                return user;
+            }
+
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
@@ -148,13 +171,12 @@ public class AppManager {
         try {
             if (user.isMahasiswa()) {
                 Mahasiswa mhs = (Mahasiswa) user;
-                mhs.addEvent(event);  // Add the event to the mahasiswa's list of events
+                mhs.addEvent(event);
 
-                // Optionally, update the Firestore record for the mahasiswa
                 Map<String, Object> updateData = new HashMap<>();
                 List<String> eventIds = new ArrayList<>();
                 for (Event e : mhs.getEvents()) {
-                    eventIds.add(e.getId());  // Manually collect the event IDs
+                    eventIds.add(e.getId());
                 }
                 updateData.put("eventIds", eventIds);
 
@@ -169,9 +191,6 @@ public class AppManager {
         }
     }
 
-
-
-
     /// ------------------------------------
     /// Chat section
     /// ------------------------------------
@@ -181,8 +200,17 @@ public class AppManager {
             String id = doc.getString("id");
             String message = doc.getString("message");
             String senderId = doc.getString("sender");
+            String type = doc.getString("type");
             User sender = getUserById(senderId);
             Timestamp timestamp = doc.getTimestamp("timestamp");
+
+            if (type != null && type.equals("event")) {
+                String eventId = doc.getString("eventId");
+                EventChat eventChat = new EventChat(message, timestamp, sender);
+                Event event = getEventById(eventId);
+                eventChat.setEvent(event);
+                return eventChat;
+            }
             return new Chat(message, timestamp, sender, id);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -201,6 +229,17 @@ public class AppManager {
     }
 
     public static void storeChatToDatabase(Chat chat) {
+        try {
+            Map<String, Object> chatData = chat.getStringObjectMap();
+            DocumentReference docRef = firestore.collection("chats").document(chat.getId());
+            ApiFuture<WriteResult> result = docRef.set(chatData);
+            result.get();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to send message: "+e.getMessage());
+        }
+    }
+
+    public static void storeChatToDatabase(EventChat chat) {
         try {
             Map<String, Object> chatData = chat.getStringObjectMap();
             DocumentReference docRef = firestore.collection("chats").document(chat.getId());
@@ -317,7 +356,7 @@ public class AppManager {
             updateData.put("questIds", event.getQuestIDs());
 
             firestore.collection("events")
-                    .document()
+                    .document(event.getId())
                     .update(updateData);
 
         } catch (Exception e) {
@@ -326,23 +365,32 @@ public class AppManager {
     }
 
     public static void storeMahasiswaToEvent(Mahasiswa mhs, Event event) {
-        if (mhs instanceof Mahasiswa) {
-            try {
-                // add quests first
-                event.getQuests().forEach(mhs::addQuest);
-                event.addMahasiswa(mhs);
+        try {
+            event.getQuests().forEach(mhs::addQuest);
+            event.addMahasiswa(mhs);
 
-                Map<String, Object> updateData = new HashMap<>();
-                updateData.put("mahasiswaIds", event.getMahasiswaIds());
-
-                firestore.collection("events")
-                        .document(event.getId())
-                        .update(updateData);
-            } catch (Exception e) {
-                System.err.println("[ERROR] Failed to add mahasiswa to event!");
+            Map<String, Boolean> questMap = new HashMap<>();
+            for (Map.Entry<Quest, Boolean> entry : mhs.getQuests().entrySet()) {
+                questMap.put(entry.getKey().getId(), entry.getValue());
             }
-        } else {
-            System.out.println("Only Mahasiswa can be added to events.");
+
+            Map<String, Object> mahasiswaUpdateData = new HashMap<>();
+            mahasiswaUpdateData.put("quests", questMap);
+            mahasiswaUpdateData.put("achievementIds", new ArrayList<String>());
+
+            firestore.collection("users")
+                    .document(mhs.getId())
+                    .update(mahasiswaUpdateData);
+
+            Map<String, Object> eventUpdateData = new HashMap<>();
+            eventUpdateData.put("mahasiswaIds", event.getMahasiswaIds());
+
+            firestore.collection("events")
+                    .document(event.getId())
+                    .update(eventUpdateData);
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to add mahasiswa to event!");
         }
     }
 
@@ -450,7 +498,7 @@ public class AppManager {
             String description = doc.getString("description");
             Quest quest = new Quest(title, description, id);
 
-            List<String> achIds = (List<String>)doc.get("achivementIds");
+            List<String> achIds = (List<String>)doc.get("achievementIds");
             assert achIds != null;
             achIds.forEach(achId -> {
                 Achievement ach = getAchievementById(achId);
@@ -518,6 +566,7 @@ public class AppManager {
                            .filter(c -> c.getId().equals(docId))
                            .findFirst()
                            .orElse(null);
+
                    // handle based on the type of change
                    switch (change.getType()) {
                        case ADDED -> {
@@ -610,12 +659,9 @@ public class AppManager {
 
     public static void storeChatToCommunity(Chat chat, Community community) {
         try {
-            storeChatToDatabase(chat);
             community.addChat(chat);
-
             Map<String, Object> updateData = new HashMap<>();
             updateData.put("chatIDs", community.getChatIds());
-
             firestore.collection("communities")
                     .document(community.getId())
                     .update(updateData);
@@ -661,6 +707,7 @@ public class AppManager {
                 chats.add(c);
             }
         });
+
         community.setChats(chats);
         community.setName(name);
         community.setId(id);

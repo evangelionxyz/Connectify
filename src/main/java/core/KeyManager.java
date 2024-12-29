@@ -14,17 +14,12 @@ public class KeyManager {
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance("AES");
             keyGen.init(128);
-
             SecretKey secretKey = keyGen.generateKey();
-
             String base64Key = Base64.getEncoder().encodeToString(secretKey.getEncoded());
-
             saveKeyToFile(base64Key);
             System.out.println("Key successfully saved to "+ GEN_FILE_PATH);
-
         } catch (Exception e) {
             System.err.println("[ERROR] Key Manager: "+e.getMessage());
-            e.printStackTrace();
         }
     }
 

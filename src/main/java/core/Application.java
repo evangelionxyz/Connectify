@@ -1,20 +1,16 @@
 package core;
-
-import com.google.api.core.ApiFuture;
-import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.*;
 import imgui.ImGui;
 import views.CommunityWindow;
+import views.QuestWindow;
 import views.HRDWindow;
 import views.LoginWindow;
-import java.util.*;
 
 public class Application {
-
     private final Window window;
     private final LoginWindow loginWindow = new LoginWindow();
     private final CommunityWindow communityWindow = new CommunityWindow();
     private final HRDWindow hrdWindow = new HRDWindow();
+    private final QuestWindow questWindow = new QuestWindow();
 
     public Application(String title) {
         window = new Window(1080, 640, title);
@@ -22,15 +18,14 @@ public class Application {
         loginWindow.init();
         communityWindow.init();
         hrdWindow.init();
+        questWindow.init();
     }
 
     private void toolBar() {
         ImGui.begin("Tool Bar");
-
         if (ImGui.button("Exit")) {
             window.close();
         }
-
         ImGui.sameLine();
         if (ImGui.button("Logout")) {
             loginWindow.open();
@@ -47,32 +42,6 @@ public class Application {
         ImGui.end();
     }
 
-    public static void readMessageFromFirestore() {
-        try {
-            ApiFuture<QuerySnapshot> future = AppManager.firestore.collection("messages")
-                    .orderBy("timestamp", Query.Direction.DESCENDING)
-                    .limit(10)
-                    .get();
-
-            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-            System.out.printf("[INFO] Last %d messages\n", documents.size());
-
-            for (QueryDocumentSnapshot document : documents) {
-                String content = document.getString("content");
-                Timestamp timestamp = document.getTimestamp("timestamp");
-                String sender = document.getString("sender");
-
-                System.out.printf("[INFO] Message from %s at %s: %s\n",
-                        sender,
-                        timestamp != null ? timestamp.toDate() : "pending",
-                        content);
-            }
-
-        } catch (Exception e) {
-            System.err.println("[ERROR] Failed to read messages: " + e.getMessage());
-        }
-    }
-
     public void run() {
         System.out.println("Application is running");
 
@@ -84,6 +53,9 @@ public class Application {
                 communityWindow.render();
                 if (AppManager.currentUser.isHRD()) {
                     hrdWindow.render();
+                }
+                else {
+                    questWindow.render();
                 }
             }
             ImGui.showDemoWindow();
