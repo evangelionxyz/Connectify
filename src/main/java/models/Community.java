@@ -96,6 +96,21 @@ public class Community extends ModelBase {
         }
     }
 
+    public void addUser(User user) {
+        if (user instanceof Mahasiswa) {
+            Mahasiswa mahasiswa = (Mahasiswa) user;
+            if (!mahasiswaIds.contains(mahasiswa.getId())) {
+                addMahasiswa(mahasiswa);  // Use the existing addMahasiswa method
+                System.out.println("User berhasil ditambahkan ke komunitas.");
+            } else {
+                System.out.println("User sudah menjadi bagian dari komunitas ini.");
+            }
+        } else {
+            System.out.println("Hanya mahasiswa yang dapat bergabung ke komunitas ini.");
+        }
+    }
+
+
     public final List<Mahasiswa> getMahasiswa() {
         return mahasiswa;
     }

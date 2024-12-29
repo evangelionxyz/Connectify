@@ -173,7 +173,7 @@ public class CommunityWindow extends WindowBase {
                 ImGui.sameLine();
                 if (AppManager.currentUser.isMahasiswa()) {
                     if (ImGui.button("Apply")) {
-                        Mahasiswa mhs = (Mahasiswa) AppManager.getUserById(AppManager.currentUser.getId());
+                        Mahasiswa mhs = (Mahasiswa)AppManager.getUserById(AppManager.currentUser.getId());
                         AppManager.storeMahasiswaToEvent(mhs, ev);
                     }
                 }

@@ -20,6 +20,7 @@ public class AppManager {
     public static Firestore firestore;
     public static User currentUser = null;
     public static Community selectedCommunity = null;
+    public static Quest selectedQuest = null;
     public static Event selectedEvent = null;
     public static List<Event> events = new ArrayList<>();
     public static List<Community> communities = new ArrayList<>();
@@ -58,7 +59,6 @@ public class AppManager {
     /// ------------------------------------
     /// User section
     /// ------------------------------------
-
     public static User createUserFromDoc(QueryDocumentSnapshot doc) {
         try {
             String displayName = doc.getString("displayname");
@@ -69,9 +69,39 @@ public class AppManager {
             String userId = doc.getString("id");
             assert encryptedPassword != null;
             String password = EncryptionUtils.decrypt(encryptedPassword, EncryptionUtils.getGlobalSecretKey());
-            User user = new User(displayName, username, type, company, password);
-            user.setId(userId);
-            return user;
+
+            if (type.equals("MAHASISWA")) {
+                Map<String, Boolean> questData = (Map<String, Boolean>)doc.get("quests");
+                Map<Quest, Boolean> questMap = new HashMap<>();
+                if (questData != null) {
+                    for (Map.Entry<String, Boolean> entry : questData.entrySet()) {
+                        Quest quest = getQuestById(entry.getKey());
+                        if (quest != null) {
+                            questMap.put(quest, entry.getValue());
+                        }
+                    }
+                }
+
+                Mahasiswa mahasiswa = new Mahasiswa(displayName, username, company, password);
+
+                mahasiswa.setId(userId);
+                mahasiswa.setQuests(questMap);
+
+                List<String> achIds = (List<String>)doc.get("achievementIds");
+                achIds.forEach(id -> {
+                    Achievement ach = getAchievementById(id);
+                    if (ach != null) {
+                        mahasiswa.addAchievement(ach);
+                    }
+                });
+
+                return mahasiswa;
+            } else {
+                User user = new User(displayName, username, type, company, password);
+                user.setId(userId);
+                return user;
+            }
+
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
@@ -134,6 +164,30 @@ public class AppManager {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
+        }
+    }
+
+    public static void storeEventToUser(Event event, User user) {
+        try {
+            if (user.isMahasiswa()) {
+                Mahasiswa mhs = (Mahasiswa) user;
+                mhs.addEvent(event);
+
+                Map<String, Object> updateData = new HashMap<>();
+                List<String> eventIds = new ArrayList<>();
+                for (Event e : mhs.getEvents()) {
+                    eventIds.add(e.getId());
+                }
+                updateData.put("eventIds", eventIds);
+
+                firestore.collection("users")
+                        .document(user.getId())
+                        .update(updateData);
+            } else {
+                System.err.println("[ERROR] User is not a mahasiswa.");
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to add event to user: " + e.getMessage());
         }
     }
 
@@ -302,7 +356,7 @@ public class AppManager {
             updateData.put("questIds", event.getQuestIDs());
 
             firestore.collection("events")
-                    .document()
+                    .document(event.getId())
                     .update(updateData);
 
         } catch (Exception e) {
@@ -312,20 +366,34 @@ public class AppManager {
 
     public static void storeMahasiswaToEvent(Mahasiswa mhs, Event event) {
         try {
-            // add quests first
             event.getQuests().forEach(mhs::addQuest);
             event.addMahasiswa(mhs);
 
-            Map<String, Object> updateData = new HashMap<>();
-            updateData.put("mahasiswaIds", event.getMahasiswaIds());
+            Map<String, Boolean> questMap = new HashMap<>();
+            for (Map.Entry<Quest, Boolean> entry : mhs.getQuests().entrySet()) {
+                questMap.put(entry.getKey().getId(), entry.getValue());
+            }
+
+            Map<String, Object> mahasiswaUpdateData = new HashMap<>();
+            mahasiswaUpdateData.put("quests", questMap);
+            mahasiswaUpdateData.put("achievementIds", new ArrayList<String>());
+
+            firestore.collection("users")
+                    .document(mhs.getId())
+                    .update(mahasiswaUpdateData);
+
+            Map<String, Object> eventUpdateData = new HashMap<>();
+            eventUpdateData.put("mahasiswaIds", event.getMahasiswaIds());
 
             firestore.collection("events")
                     .document(event.getId())
-                    .update(updateData);
+                    .update(eventUpdateData);
+
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to add mahasiswa to event!");
         }
     }
+
 
     public static void storeEventToDatabase(Event event) {
         try {
@@ -376,6 +444,7 @@ public class AppManager {
             System.err.println("[ERROR] Failed to update event: "+e.getMessage());
         }
     }
+
 
     /// ------------------------------------
     /// Achievement section
@@ -429,7 +498,7 @@ public class AppManager {
             String description = doc.getString("description");
             Quest quest = new Quest(title, description, id);
 
-            List<String> achIds = (List<String>)doc.get("achivementIds");
+            List<String> achIds = (List<String>)doc.get("achievementIds");
             assert achIds != null;
             achIds.forEach(achId -> {
                 Achievement ach = getAchievementById(achId);

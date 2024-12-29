@@ -1,7 +1,7 @@
 package core;
 import imgui.ImGui;
 import views.CommunityWindow;
-import views.EventWindow;
+import views.QuestWindow;
 import views.HRDWindow;
 import views.LoginWindow;
 
@@ -10,7 +10,7 @@ public class Application {
     private final LoginWindow loginWindow = new LoginWindow();
     private final CommunityWindow communityWindow = new CommunityWindow();
     private final HRDWindow hrdWindow = new HRDWindow();
-    private final EventWindow eventWindow = new EventWindow();
+    private final QuestWindow questWindow = new QuestWindow();
 
     public Application(String title) {
         window = new Window(1080, 640, title);
@@ -18,7 +18,7 @@ public class Application {
         loginWindow.init();
         communityWindow.init();
         hrdWindow.init();
-        eventWindow.init();
+        questWindow.init();
     }
 
     private void toolBar() {
@@ -55,7 +55,7 @@ public class Application {
                     hrdWindow.render();
                 }
                 else {
-                    eventWindow.render();
+                    questWindow.render();
                 }
             }
             ImGui.showDemoWindow();
