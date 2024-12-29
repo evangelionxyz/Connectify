@@ -168,13 +168,13 @@ public class CommunityWindow extends WindowBase {
             if (ec.getEvent() != null) {
                 Event ev = ec.getEvent();
                 ImGui.text("EVENT - " + ev.getTitle());
-
                 ImGui.text(c.getTimestamp().toDate().toString());
 
                 ImGui.sameLine();
                 if (AppManager.currentUser.isMahasiswa()) {
                     if (ImGui.button("Apply")) {
-                        System.out.println("here here bandage");
+                        Mahasiswa mhs = (Mahasiswa) AppManager.getUserById(AppManager.currentUser.getId());
+                        AppManager.storeMahasiswaToEvent(mhs, ev);
                     }
                 }
             }

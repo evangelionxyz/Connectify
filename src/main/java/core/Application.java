@@ -1,6 +1,7 @@
 package core;
 import imgui.ImGui;
 import views.CommunityWindow;
+import views.EventWindow;
 import views.HRDWindow;
 import views.LoginWindow;
 
@@ -9,6 +10,7 @@ public class Application {
     private final LoginWindow loginWindow = new LoginWindow();
     private final CommunityWindow communityWindow = new CommunityWindow();
     private final HRDWindow hrdWindow = new HRDWindow();
+    private final EventWindow eventWindow = new EventWindow();
 
     public Application(String title) {
         window = new Window(1080, 640, title);
@@ -16,6 +18,7 @@ public class Application {
         loginWindow.init();
         communityWindow.init();
         hrdWindow.init();
+        eventWindow.init();
     }
 
     private void toolBar() {
@@ -50,6 +53,9 @@ public class Application {
                 communityWindow.render();
                 if (AppManager.currentUser.isHRD()) {
                     hrdWindow.render();
+                }
+                else {
+                    eventWindow.render();
                 }
             }
             ImGui.showDemoWindow();

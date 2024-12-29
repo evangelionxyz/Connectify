@@ -24,6 +24,7 @@ public class AppManager {
     public static List<Event> events = new ArrayList<>();
     public static List<Community> communities = new ArrayList<>();
     public static ArrayList<String> eventTitles = new ArrayList<>();
+    public static ArrayList<Event> userEvents = new ArrayList<>();
 
     public static void initializeFirebase() throws IOException {
         FileInputStream serviceAccount = new FileInputStream("C:/connectify-telu-firebase-adminsdk.json");

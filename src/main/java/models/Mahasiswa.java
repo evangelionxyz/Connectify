@@ -33,4 +33,5 @@ public class Mahasiswa extends User {
     public String toString() {
         return String.format("Name: %s, ID: %s", name, id);
     }
+
 }
