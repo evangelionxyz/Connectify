@@ -10,16 +10,22 @@ public class Mahasiswa extends User {
     private List<Achievement> achievements;
     private List<Event> events;
 
+    private List<String> achievementIds;
+
     public Mahasiswa(String name, String username, String company, String password) {
         super(name, username, "MAHASISWA", company, password);
         quests = new HashMap<>();
         events = new ArrayList<>();
+        achievements = new ArrayList<>();
+        achievementIds = new ArrayList<>();
     }
 
     public Mahasiswa(String name, String username, String company) {
         super(name, username, "MAHASISWA", company);
         quests = new HashMap<>();
         events = new ArrayList<>();
+        achievements = new ArrayList<>();
+        achievementIds = new ArrayList<>();
     }
 
     public void addEvent(Event event) {
@@ -42,14 +48,20 @@ public class Mahasiswa extends User {
     }
 
     public void doQuest(Quest quest) {
+        this.quests.put(quest, true);
     }
 
     public void addAchievement(Achievement ach) {
         this.achievements.add(ach);
+        achievementIds.add(ach.getId());
     }
 
     public List<Achievement> getAchievement() {
         return achievements;
+    }
+
+    public List<String> getAchievementIds() {
+        return achievementIds;
     }
 
     public Map<Quest, Boolean> getQuests() {

@@ -191,6 +191,22 @@ public class AppManager {
         }
     }
 
+    public static void storeAchievementToMahasiswa(Achievement ach, Mahasiswa mhs) {
+        try {
+            mhs.addAchievement(ach);
+
+            Map<String, Object> updateMap = new HashMap<>();
+            updateMap.put("achievementIds", mhs.getAchievementIds());
+
+            firestore.collection("users")
+                     .document(mhs.getId())
+                     .update(updateMap);
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to store achievement to mahasiswa." + e.getMessage());
+        }
+    }
+
     /// ------------------------------------
     /// Chat section
     /// ------------------------------------
@@ -545,6 +561,23 @@ public class AppManager {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
+        }
+    }
+
+    public static void storeAchievementToQuest(Achievement ach, Quest quest) {
+        try {
+            storeAchievementToDatabase(ach);
+            quest.addAchievement(ach);
+
+            Map<String, Object> updateMap = new HashMap<>();
+            updateMap.put("achievementIds", quest.getAchievementIds());
+
+            firestore.collection("quests")
+                    .document(quest.getId())
+                    .update(updateMap);
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to add achievement to quest: " + e.getMessage());
         }
     }
 

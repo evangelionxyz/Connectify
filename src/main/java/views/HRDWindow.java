@@ -6,21 +6,28 @@ import imgui.ImVec2;
 import imgui.ImVec4;
 import imgui.flag.*;
 import imgui.internal.ImGui;
+import imgui.internal.ImGuiWindow;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import models.Community;
-import models.Event;
-import models.EventChat;
-import models.Quest;
+import models.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HRDWindow extends WindowBase {
     private final ImBoolean imCreateWin = new ImBoolean(false);
     private final ImBoolean imDeleteConfirmWin = new ImBoolean(false);
     private final ImBoolean imCreateQuestWin = new ImBoolean(false);
     private final ImBoolean imSendToComWin = new ImBoolean(false);
+    private final ImBoolean imCreateAchWin = new ImBoolean(false);
 
     private final ImString questTitleInput = new ImString(256);
     private final ImString questDescInput = new ImString(256);
+
+    private final ImString achTitleInput = new ImString(256);
+    private final ImString achTagInput = new ImString(256);
+
+    private List<String> achTags = new ArrayList<>();
 
     private final ImString userChatInput = new ImString(256);
     private final ImString eventTitleInput = new ImString(128);
@@ -153,6 +160,49 @@ public class HRDWindow extends WindowBase {
         ImGui.end();
     }
 
+    private void createAchievementWindow() {
+        ImGui.begin("Create Achievement", imCreateAchWin, ImGuiWindowFlags.AlwaysAutoResize);
+
+        ImGui.inputText("Title", achTitleInput);
+        ImGui.inputText("##New Tag", achTagInput);
+
+        ImGui.sameLine();
+        if (ImGui.button("Add Tag")) {
+            if (achTagInput.isNotEmpty()) {
+                achTags.add(achTagInput.get());
+                achTagInput.clear();
+            }
+        }
+
+        for (int i = 0; i < achTags.size(); ++i) {
+            if (ImGui.button(achTags.get(i))) {
+                achTags.remove(i);
+            }
+
+            if (i < achTags.size() - 1){
+                ImGui.sameLine();
+            }
+        }
+
+        if (ImGui.button("Create") && AppManager.selectedQuest != null) {
+            Achievement ach = new Achievement(achTitleInput.get());
+            achTags.forEach(ach::addTags);
+            AppManager.storeAchievementToQuest(ach, AppManager.selectedQuest);
+
+            achTitleInput.clear();
+            achTags.clear();
+            imCreateAchWin.set(false);
+        }
+
+        ImGui.sameLine();
+        if (ImGui.button("Cancel")) {
+            achTitleInput.clear();
+            achTags.clear();
+            imCreateAchWin.set(false);
+        }
+        ImGui.end();
+    }
+
     @Override
     public void render() {
 
@@ -164,6 +214,8 @@ public class HRDWindow extends WindowBase {
             createQuestWindow();
         } else if (imSendToComWin.get()) {
             sendToCommunityWindow();
+        } else if (imCreateAchWin.get()) {
+            createAchievementWindow();
         }
 
         ImGui.begin("Event Manager");
@@ -292,12 +344,21 @@ public class HRDWindow extends WindowBase {
                     if (AppManager.selectedQuest != null) {
                         ImGui.text(AppManager.selectedQuest.getTitle());
                         ImGui.text(AppManager.selectedQuest.getDescription());
+
+                        ImGui.pushStyleColor(ImGuiCol.Button, new ImVec4(0.8f, 0.1f, 0.1f, 1.0f));
+                        for (int i = 0; i < AppManager.selectedQuest.getAchievements().size(); ++i) {
+                            Achievement ach = AppManager.selectedQuest.getAchievements().get(i);
+                            ImGui.button(ach.getName());
+                        }
+                        ImGui.popStyleColor();
+
+                        if (ImGui.button("Create Achievement")) {
+                            imCreateAchWin.set(true);
+                        }
                     }
                     ImGui.endChild();
                 }
                 ImGui.endChild();
-
-
             }
         }
         ImGui.endChild(); // !event_content
